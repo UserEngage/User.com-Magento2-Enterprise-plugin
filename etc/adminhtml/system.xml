@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="usercom" translate="label" sortOrder="10">
+            <label>User.com</label>
+        </tab>
+        <section id="usercom" translate="label" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>General</label>
+            <tab>usercom</tab>
+            <resource>Usercom_Analytics::yourmodule_configuration</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>General Configuration</label>
+                <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Module Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Your app Api Key</label>
+                    <comment>Please, enter your Api Key (6 characters long).</comment>
+                    <tooltip>You can find an Api Key in the Settings > Setup &amp; Integrations section in the User.com app</tooltip>
+                </field>
+                <field id="subdomain" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Your app subdomain</label>
+                    <comment>Please, enter your User.com domain name. For example: "your-company.user.com"</comment>
+                    <tooltip>You can find a domain name in the Settings > Setup &amp; Integrations section in the User.com app</tooltip>
+                </field>
+                <field id="token" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Your app REST Api key</label>
+                    <comment>Please enter your app Rest Api key, created under https://your-company.user.com/api/credentials/</comment>
+                    <tooltip>Can be created under Settings > Advanced > Public REST API keys in your User.com app panel</tooltip>
+                </field>
+                <field id="sendStoreSource" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Send Store Source</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
