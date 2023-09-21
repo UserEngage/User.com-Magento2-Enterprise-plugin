@@ -2,45 +2,13 @@
 
 namespace Usercom\Analytics\Observer\Customer;
 
-use Magento\Customer\Model\CustomerRegistry;
-
-class RegisterSuccess implements \Magento\Framework\Event\ObserverInterface
+class RegisterSuccess extends EventAbstract implements \Magento\Framework\Event\ObserverInterface
 {
-    protected $helper;
-    protected $usercom;
-    protected $request;
-    protected CustomerRegistry $customerRegistry;
-
-    public function __construct(
-        CustomerRegistry $customerRegistry,
-        \Usercom\Analytics\Helper\Data $helper,
-        \Usercom\Analytics\Helper\Usercom $usercom,
-        \Magento\Framework\App\RequestInterface $request
-    ) {
-        $this->customerRegistry = $customerRegistry;
-        $this->helper           = $helper;
-        $this->usercom          = $usercom;
-        $this->request          = $request;
-    }
 
     public function execute(
         \Magento\Framework\Event\Observer $observer
     ) {
-        $customer = $observer->getEvent()->getData('customer');
-        $customerModel = $this->customerRegistry->retrieve($customer->getId());
-        $userUserId    = $customerModel->getData('usercom_user_id');
-
-        if (is_null($userUserId)) {
-            $hash = $this->usercom->getUserHash(
-                $customerModel->getId()
-            );
-            $customerModel->setData(
-                'usercom_user_id',
-                $hash
-            );
-            $customerModel->save();
-        }
-
+        $this->generateUserComUserID($observer);
 
 //        if( !$this->helper->isModuleEnabled() || !($usercomCustomerId = $this->usercom->getUsercomCustomerId($customerId)) )
 //            return;
@@ -63,5 +31,4 @@ class RegisterSuccess implements \Magento\Framework\Event\ObserverInterface
 //        $this->helper->set
 //        $this->usercom->createEvent($data);
     }
-
 }

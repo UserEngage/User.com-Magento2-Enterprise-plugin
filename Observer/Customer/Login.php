@@ -2,40 +2,13 @@
 
 namespace Usercom\Analytics\Observer\Customer;
 
-use Magento\Customer\Model\CustomerRegistry;
-
-class Login implements \Magento\Framework\Event\ObserverInterface
+class Login extends EventAbstract implements \Magento\Framework\Event\ObserverInterface
 {
-
-    protected $helper;
-    protected $usercom;
-    protected CustomerRegistry $customerRegistry;
-
-    public function __construct(
-        CustomerRegistry $customerRegistry,
-        \Usercom\Analytics\Helper\Data $helper,
-        \Usercom\Analytics\Helper\Usercom $usercom
-    ) {
-        $this->customerRegistry = $customerRegistry;
-        $this->helper           = $helper;
-        $this->usercom          = $usercom;
-    }
 
     public function execute(
         \Magento\Framework\Event\Observer $observer
     ) {
-        $customerModel = $observer->getEvent()->getData('customer');
-        $userUserId    = $customerModel->getData('usercom_user_id');
-        if (is_null($userUserId)) {
-            $hash = $this->usercom->getUserHash(
-                $customerModel->getId()
-            );
-            $customerModel->setData(
-                'usercom_user_id',
-                $hash
-            );
-            $customerModel->save();
-        }
+        $this->generateUserComUserID($observer);
 
 //        $customer = $observer->getEvent()->getData('customer');
 //
