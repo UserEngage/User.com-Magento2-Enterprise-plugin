@@ -1,0 +1,17 @@
+{
+  "name": "usercom/magento-2-enterprise-edition",
+  "version": "0.2.0",
+  "description": "User.com x Magento 2 Enterprise Edition integration",
+  "type": "magento2-module",
+  "require": {
+    "php": ">=7.4.0"
+  },
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Piotr Niewczas",
+      "email": "piotr.niewczas@movecloser.pl"
+    }
+  ],
+  "minimum-stability": "dev"
+}
