@@ -1,12 +1,20 @@
 {
   "name": "usercom/user-com-magento-2-enterprise-integration",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Official User.com plugin to integrate with Magento 2 Enterprise Edition",
   "type": "magento2-module",
   "require": {
     "php": ">=7.4.0"
   },
   "license": "proprietary",
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Usercom\\Analytics\\": ""
+    }
+  },
   "authors": [
     {
       "name": "Piotr Niewczas",

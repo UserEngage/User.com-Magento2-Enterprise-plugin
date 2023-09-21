@@ -3,7 +3,7 @@
 Official Magento 2 EE module for User.com integration. This tag will implement User.com on your Website and synchronize your 
 
 ## Requirements
-Magento 2.3.4 version or higher  
+Magento 2.4.5-p1 version or higher  
 PHP 7.4 or higher
 
 ## Installation process
