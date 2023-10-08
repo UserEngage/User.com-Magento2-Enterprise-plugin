@@ -35,6 +35,20 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>
+
+            <group id="sync" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Synchronization</label>
+                <field id="customersSyncTime" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Time</label>
+                    <source_model>Usercom\Analytics\Block\System\Config\SyncTime</source_model>
+                </field>
+                <field id="customersSyncButton" translate="label comment" type="button" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <frontend_model>Usercom\Analytics\Block\System\Config\CustomersSyncButton</frontend_model>
+                    <comment>Directly synchronize all of your customers data to User.com app</comment>
+                    <tooltip>It creates users visible in your User.com app inside People section. Users have to be created before order/purchase product events synchronization.</tooltip>
+                </field>
+            </group>
         </section>
+
     </system>
 </config>

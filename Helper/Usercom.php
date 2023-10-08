@@ -2,6 +2,8 @@
 
 namespace Usercom\Analytics\Helper;
 
+use Modules\Identity\Command\App\Support\Helpers\UserUniqueIdCreator;
+
 class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const COOKIE_USERKEY = "userKey";
@@ -56,6 +58,79 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         return 'usercom_salt';
     }
 
+    public function syncUserById($userId, $data)
+    {
+        return $this->sendCurl(
+            sprintf('users/%s/', $userId),
+            'PUT',
+            $this->mapDataForUsercom($data)
+        );
+    }
+
+    /**
+     * @param $url
+     * @param string $method
+     * @param null $data
+     *
+     * @return mixed
+     */
+    public function sendCurl($url, string $method = 'GET', $data = null)
+    {
+        $ms   = microtime(true);
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => 'https://' . $this->helper->getSubdomain() . '/api/public/' . $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => "",
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => $method,
+            CURLOPT_HTTPHEADER     => [
+                "Accept: */*; version=2",
+                "authorization: Token " . $this->helper->getToken()
+            ],
+        ]);
+
+        if ( ! empty($data)) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                "Accept: */*; version=2",
+                "authorization: Token " . $this->helper->getToken(),
+                "content-type: application/json"
+            ]);
+        }
+
+        $response = curl_exec($curl);
+        $err      = curl_error($curl);
+        $me       = microtime(true);
+
+        $this->logRequest('sendCurl' . $method, $url, [], $me - $ms, $response);
+        if ( ! empty($err)) {
+            $this->logError('sendCurl' . $method, $url, $err, $response);
+        }
+        curl_close($curl);
+
+        return ($err) ? null : json_decode($response);
+    }
+
+    /**
+     * @param $data
+     *
+     * @return void
+     */
+    private function logRequest($name, $url, $data, $mt, $response): void
+    {
+        if (self::DEBUG_USERCOM) {
+            file_put_contents(
+                '/var/www/var/log/usercom.log',
+                $name . ': ' . $mt . "\n" . $url . "\nREQUEST:   " . json_encode($data) . "\nRESPONSE:   " . $response . "\n\n\n\n\n",
+                FILE_APPEND
+            );
+        }
+    }
+
     private function logError(string $name, $url, string $err, $response)
     {
         if (self::DEBUG_USERCOM) {
@@ -65,5 +140,50 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
                 FILE_APPEND
             );
         }
+    }
+
+    public function mapDataForUsercom($data): array
+    {
+        $mappedData              = [];
+        $mappedData['email']     = $data['email'];
+        $mappedData['user_id']   = $data['usercom_user_id'];
+        $mappedData['custom_id'] = $data['usercom_user_id'];
+//        $mappedData['paywall']                = $user->hasSubscription();
+//        $mappedData['paywall_type']           = $sub->type ?? null;
+//        $mappedData['paywall_period']         = $sub->period ?? null;
+//        $mappedData['paywall_active']         = $daysLeft > 0 ?? false;
+//        $mappedData['paywall_active_payment'] = $sub->is_active ?? false;
+//        $mappedData['paywall_days_left']      = $daysLeft;
+//        $mappedData['account_ltv']            = $data['total'];
+        $mappedData['account_created_at'] = $data['created_at'];
+        $mappedData['account_is_active']  = $data['is_active'];
+        $mappedData['First name']         = $data['firstname'];
+        $mappedData['Last name']          = $data['lastname'];
+
+        return $mappedData;
+    }
+
+    public function syncUserHash($data)
+    {
+        return $this->sendCurl(
+            sprintf('users/update_or_create/'),
+            'POST',
+            $this->mapDataForUsercom($data)
+        );
+    }
+
+    /**
+     * @param $email
+     *
+     * @return mixed
+     */
+    public function getUserByEmail($email): mixed
+    {
+        $users = $this->sendCurl('users/search/?email=' . $email, 'GET');
+        if ( ! empty($users->results)) {
+            return $users[0];
+        }
+
+        return null;
     }
 }
