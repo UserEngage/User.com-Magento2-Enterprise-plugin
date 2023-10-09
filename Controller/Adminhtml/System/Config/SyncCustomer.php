@@ -48,7 +48,8 @@ class SyncCustomer extends \Magento\Backend\App\Action
                                                 ->getCollection()
                                                 ->addAttributeToSelect("created_at")
                                                 ->addAttributeToSelect("id")
-                                                ->addAttributeToSelect("usercom_user_id");
+                                                ->addAttributeToSelect("usercom_user_id")
+                                                ->addAttributeToSelect("usercom_user_key");
         if ($from !== null) {
             $customersQuery->addAttributeToFilter('created_at', ['from' => $from]);
         }
@@ -57,15 +58,26 @@ class SyncCustomer extends \Magento\Backend\App\Action
 
         foreach ($customers as $customer) {
             $customerData          = $customer->getData();
-            $customerUsercomUserId = $customerData['usercom_user_id'];
+            $customerUsercomUserId = $customerData['usercom_user_id'] ?? null;
+            $customerUsercomKey    = $customerData['usercom_user_key'] ?? null;
             $customerEmail         = $customerData['email'];
-            $customerId            = $customer->getId();
-            if (empty($customerUsercomUserId)) {
+            $customerId = $customer->getId();
+            if (empty($customerUsercomUserId) || empty($customerUsercomKey)) {
                 $customerEntity = $this->customerRepository->getById($customerId);
-                $user           = $this->userComHelper->getUserByEmail($customerEmail);
-                $hash           = null;
-                if ( ! empty($user)) {
-                    $hash = $user['user_id'];
+                $users = $this->userComHelper->getUsersByEmail($customerEmail);
+                $user  = null;
+                foreach ($users ?? [] as $u) {
+                    if ($u->custom_id == $customerUsercomUserId) {
+                        $user = $u;
+                    }
+                }
+                if ($user === null && $users) {
+                    $user = $users[0];
+                }
+                unset($u);
+                $hash = null;
+                if ($user !== null) {
+                    $hash = $user->custom_id ?? null;
                 }
                 if (empty($hash)) {
                     $hash = $this->userComHelper->getUserHash($customerId);
@@ -75,9 +87,15 @@ class SyncCustomer extends \Magento\Backend\App\Action
                     'usercom_user_id',
                     $hash
                 );
+                if ($user !== null) {
+                    $customerEntity->setCustomAttribute(
+                        'usercom_user_key',
+                        $user->user_key
+                    );
+                }
                 $this->customerRepository->save($customerEntity);
                 if ($user !== null) {
-                    $this->userComHelper->syncUserById($user['id'], $customerData);
+                    $this->userComHelper->syncUserById($user->id, $customerData);
                 }
             }
 

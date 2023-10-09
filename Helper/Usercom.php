@@ -175,13 +175,28 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @param $email
      *
-     * @return mixed
+     * @return mixed|null
      */
-    public function getUserByEmail($email): mixed
+    public function getUserByEmail($email)
     {
-        $users = $this->sendCurl('users/search/?email=' . $email, 'GET');
-        if ( ! empty($users->results)) {
-            return $users[0];
+        $user = $this->sendCurl('users/search/?email=' . $email, 'GET');
+        if ( ! empty($user)) {
+            return $user;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $email
+     *
+     * @return mixed|null
+     */
+    public function getUsersByEmail($email)
+    {
+        $users = $this->sendCurl('users/search/?email=' . $email . '&many=true', 'GET');
+        if ( ! empty($users)) {
+            return $users;
         }
 
         return null;
