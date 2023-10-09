@@ -47,6 +47,11 @@
                     <comment>Directly synchronize all of your customers data to User.com app</comment>
                     <tooltip>It creates users visible in your User.com app inside People section. Users have to be created before order/purchase product events synchronization.</tooltip>
                 </field>
+                <field id="attributesSyncButton" translate="label comment" type="button" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <frontend_model>Usercom\Analytics\Block\System\Config\AttributesSyncButton</frontend_model>
+                    <comment>List custom attributes from User.com</comment>
+                    <tooltip></tooltip>
+                </field>
             </group>
         </section>
 

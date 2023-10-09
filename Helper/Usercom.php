@@ -8,7 +8,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const COOKIE_USERKEY = "userKey";
 //    const COOKIE_USER_ID = "userComUserId";
-    const DEBUG_USERCOM = false;
+    const DEBUG_USERCOM = true;
     protected $helper;
     protected $cookieManager;
     protected $storeManager;
@@ -172,6 +172,11 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         );
     }
 
+    public function getCustomerByCustomId($custom_id)
+    {
+        return $this->sendCurl('users-by-id/' . $custom_id . '/', 'GET');
+    }
+
     /**
      * @param $email
      *
@@ -190,15 +195,25 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     /**
      * @param $email
      *
-     * @return mixed|null
+     * @return mixed
      */
-    public function getUsersByEmail($email)
+    public function getUsersByEmail($email): array
     {
         $users = $this->sendCurl('users/search/?email=' . $email . '&many=true', 'GET');
         if ( ! empty($users)) {
             return $users;
         }
 
-        return null;
+        return [];
+    }
+
+    public function listAttributes()
+    {
+        $attributes = $this->sendCurl('attributes/', 'GET');
+        if ( ! empty($attributes)) {
+            return $attributes->results ?? [];
+        }
+
+        return [];
     }
 }
