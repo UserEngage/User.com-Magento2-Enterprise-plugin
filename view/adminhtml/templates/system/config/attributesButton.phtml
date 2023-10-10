@@ -2,27 +2,32 @@
     require([
         'jquery',
         'prototype'
-    ], function(jQuery){
+    ], function (jQuery) {
 
         var indicator = jQuery('.sync-indicator#<?=$block->getButtonId()?>');
-        var error =  jQuery('.error-message#<?=$block->getButtonId()?>');
+        var error = jQuery('.error-message#<?=$block->getButtonId()?>');
+        var baseFields = JSON.parse('<?=json_encode($block->getFields())?>')
 
         jQuery('#<?= $block->getButtonId() ?>').click(function () {
             var params = {};
             new Ajax.Request('<?= $block->getAjaxUrl() ?>', {
-                parameters:     params,
-                method:         'GET',
-                loaderArea:     false,
-                asynchronous:   true,
-                onCreate: function() {
+                parameters: params,
+                method: 'GET',
+                loaderArea: false,
+                asynchronous: true,
+                onCreate: function () {
                     indicator.find('.collected').hide();
                     indicator.find('.processing').show();
                     indicator.find('.status-text').text('');
                     error.html('');
                 },
-                onSuccess: function(response) {
+                onSuccess: function (response) {
                     indicator.find('.processing').hide();
-
+                    // TODO array merge by name and show table to manage
+                    console.log(baseFields)
+                    console.log(response.responseJSON.data)
+                    const mergeResult = [...baseFields, ...response.responseJSON.data];
+                    console.log(mergeResult)
                     var resultText = '';
                     if (response.status > 200) {
                         resultText = response.statusText;
@@ -32,7 +37,7 @@
                     }
                     indicator.find('.status-text').html("Success");
                 },
-                onFailure: function(response) {
+                onFailure: function (response) {
 
                     indicator.find('.processing').hide();
                     resultText = response.responseJSON["status"];
@@ -45,13 +50,16 @@
     });
 </script>
 
-<?php echo $block->getButtonHtml() ?>
-<div id="<?= $block->getButtonId()?>" class="sync-indicator" style="display:inline-block">
+<?php
+echo $block->getButtonHtml() ?>
+<div id="<?= $block->getButtonId() ?>" class="sync-indicator" style="display:inline-block">
     <span class="sync-indicator">
-        <img class="processing" hidden="hidden" alt="Synchronize" style="margin:0 5px" src="<?php echo $block->getViewFileUrl('images/process_spinner.gif') ?>"/>
-        <img class="collected" hidden="hidden" alt="Synchronized" style="margin:-3px 5px" src="<?php echo $block->getViewFileUrl('images/rule_component_apply.gif') ?>"/>
+        <img class="processing" hidden="hidden" alt="Synchronize" style="margin:0 5px" src="<?php
+        echo $block->getViewFileUrl('images/process_spinner.gif') ?>"/>
+        <img class="collected" hidden="hidden" alt="Synchronized" style="margin:-3px 5px" src="<?php
+        echo $block->getViewFileUrl('images/rule_component_apply.gif') ?>"/>
         <span class="status-text"></span>
     </span>
 </div>
-<div id="<?= $block->getButtonId()?>" class="error-message">
+<div id="<?= $block->getButtonId() ?>" class="error-message">
 </div>

@@ -9,6 +9,28 @@ class AttributesSyncButton extends \Magento\Config\Block\System\Config\Form\Fiel
 {
     const BUTTON_ID = "syncAttributes";
     const TIME_ID = "usercom_sync_customersSyncTime";
+    const BASE_FIELDS = [
+        [
+            "name"         => 'orders_ltv',
+            'content_type' => "user",
+            "value_type"   => "float"
+        ],
+        [
+            "name"         => 'orders_aov',
+            'content_type' => "user",
+            "value_type"   => "float"
+        ],
+        [
+            "name"         => 'orders_count',
+            'content_type' => "user",
+            "value_type"   => "integer"
+        ],
+        [
+            "name"         => 'marketing_allow',
+            'content_type' => "user",
+            "value_type"   => "boolean"
+        ]
+    ];
 
     protected $_template = 'Usercom_Analytics::system/config/attributesButton.phtml';
 
@@ -49,6 +71,14 @@ class AttributesSyncButton extends \Magento\Config\Block\System\Config\Form\Fiel
     public function getButtonId(): string
     {
         return self::BUTTON_ID;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFields(): array
+    {
+        return self::BASE_FIELDS;
     }
 
     /**

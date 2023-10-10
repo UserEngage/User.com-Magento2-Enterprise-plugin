@@ -7,13 +7,16 @@ class SyncAttributes extends \Magento\Backend\App\Action
     protected \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory;
     protected array $syncTimeArray;
     protected \Usercom\Analytics\Helper\Usercom $userComHelper;
+    private \Usercom\Analytics\Helper\Data $helper;
 
     public function __construct(
+        \Usercom\Analytics\Helper\Data $helper,
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Usercom\Analytics\Block\System\Config\SyncTime $syncTime,
         \Usercom\Analytics\Helper\Usercom $userComHelper
     ) {
+        $this->helper            = $helper;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->syncTimeArray     = $syncTime->toOptionArray();
         $this->userComHelper     = $userComHelper;
@@ -22,10 +25,11 @@ class SyncAttributes extends \Magento\Backend\App\Action
 
     public function execute()
     {
+        $this->helper->getFieldMapping();
 //        $key     = $_POST["time"] ?? null;
 //        $lastDay = $_POST["lastDat"] ?? null;
 
-        $data = $this->userComHelper->listAttributes();
+        $data    = $this->userComHelper->listAttributes();
         $message = 'Success';
 
         return ( ! empty($errorMessage)) ? $this->result($errorMessage, [], 409) : $this->result($message, $data, 200);
