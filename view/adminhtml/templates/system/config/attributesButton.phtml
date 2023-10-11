@@ -24,10 +24,21 @@
                 onSuccess: function (response) {
                     indicator.find('.processing').hide();
                     // TODO array merge by name and show table to manage
-                    console.log(baseFields)
-                    console.log(response.responseJSON.data)
-                    const mergeResult = [...baseFields, ...response.responseJSON.data];
-                    console.log(mergeResult)
+                    const headerRow = {
+                        content_type: 'Type', id: 'ID', name: 'name', value_type: 'Value Type'
+                    }
+                    let fields = {
+                        header: headerRow
+                    };
+
+                    baseFields.map(item => {
+                        console.log(item.name)
+                        fields[item.name] = item;
+                    })
+                    response.responseJSON.data.map(item => {
+                        fields[item.name] = item;
+                    })
+                    console.log(fields)
                     var resultText = '';
                     if (response.status > 200) {
                         resultText = response.statusText;
