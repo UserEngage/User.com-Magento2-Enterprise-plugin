@@ -2,7 +2,7 @@
 
 namespace Usercom\Analytics\Controller\Adminhtml\System\Config;
 
-class SyncAttributes extends \Magento\Backend\App\Action
+class ListAttributes extends \Magento\Backend\App\Action
 {
     protected \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory;
     protected array $syncTimeArray;
@@ -26,7 +26,7 @@ class SyncAttributes extends \Magento\Backend\App\Action
     public function execute()
     {
         $this->helper->getFieldMapping();
-        $data    = $this->userComHelper->syncAttribute();
+        $data    = $this->userComHelper->listAttributes();
         $message = 'Success';
 
         return ( ! empty($errorMessage)) ? $this->result($errorMessage, [], 409) : $this->result($message, $data, 200);

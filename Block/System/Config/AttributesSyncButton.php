@@ -13,22 +13,26 @@ class AttributesSyncButton extends \Magento\Config\Block\System\Config\Form\Fiel
         [
             "name"         => 'orders_ltv',
             'content_type' => "user",
-            "value_type"   => "float"
+            "value_type"   => "float",
+            "mapping"      => "automatic"
         ],
         [
             "name"         => 'orders_aov',
             'content_type' => "user",
-            "value_type"   => "float"
+            "value_type"   => "float",
+            "mapping"      => "automatic"
         ],
         [
             "name"         => 'orders_count',
             'content_type' => "user",
-            "value_type"   => "integer"
+            "value_type"   => "integer",
+            "mapping"      => "automatic"
         ],
         [
             "name"         => 'marketing_allow',
             'content_type' => "user",
-            "value_type"   => "boolean"
+            "value_type"   => "boolean",
+            "mapping"      => "automatic"
         ]
     ];
 
@@ -61,6 +65,14 @@ class AttributesSyncButton extends \Magento\Config\Block\System\Config\Form\Fiel
      * @return string
      */
     public function getAjaxUrl(): string
+    {
+        return $this->getUrl('usercom_analytics/system_config/listAttributes');
+    }
+
+    /**
+     * @return string
+     */
+    public function getSyncAjaxUrl(): string
     {
         return $this->getUrl('usercom_analytics/system_config/syncattributes');
     }
@@ -100,7 +112,7 @@ class AttributesSyncButton extends \Magento\Config\Block\System\Config\Form\Fiel
         )->setData(
             [
                 'id'    => self::BUTTON_ID,
-                'label' => __('List Attributes'),
+                'label' => __('Configure Custom Attributes'),
             ]
         );
 

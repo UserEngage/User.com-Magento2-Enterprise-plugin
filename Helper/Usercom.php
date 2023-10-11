@@ -216,4 +216,23 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
         return [];
     }
+
+    public function syncAttribute()
+    {
+        $params    = [];
+        $name      = $_POST['name'] ?? false;
+        $valueType = $_POST['value_type'] ?? false;
+        if ($name === false || $valueType === false) {
+            return [];
+        }
+        $params['name']         = $name;
+        $params['value_type']   = $valueType;
+        $params['content_type'] = 'clientuser';
+        $attributes             = $this->sendCurl('attributes/', 'POST', $params);
+        if ( ! empty($attributes)) {
+            return $attributes->results ?? [];
+        }
+
+        return [];
+    }
 }
