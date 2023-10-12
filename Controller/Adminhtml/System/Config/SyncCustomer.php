@@ -9,8 +9,10 @@ class SyncCustomer extends \Magento\Backend\App\Action
     protected \Magento\Customer\Model\CustomerFactory $customerFactory;
     protected \Usercom\Analytics\Helper\Usercom $userComHelper;
     protected \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository;
+    protected \Usercom\Analytics\Helper\Data $helper;
 
     public function __construct(
+        \Usercom\Analytics\Helper\Data $helper,
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Usercom\Analytics\Block\System\Config\SyncTime $syncTime,
@@ -18,6 +20,7 @@ class SyncCustomer extends \Magento\Backend\App\Action
         \Usercom\Analytics\Helper\Usercom $userComHelper,
         \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository
     ) {
+        $this->helper             = $helper;
         $this->resultJsonFactory  = $resultJsonFactory;
         $this->syncTimeArray      = $syncTime->toOptionArray();
         $this->customerFactory    = $customerFactory;
@@ -45,6 +48,8 @@ class SyncCustomer extends \Magento\Backend\App\Action
         } else {
             $from = date('Y-m-d h:i:s', strtotime($optionTime));
         }
+
+        $API       = $this->helper->getApi();
         $customersQuery = $this->customerFactory->create()
                                                 ->getCollection()
                                                 ->addAttributeToSelect("created_at")
@@ -66,7 +71,7 @@ class SyncCustomer extends \Magento\Backend\App\Action
             $customerUsercomKey    = $customerData['usercom_key'] ?? null;
             $customerEmail         = $customerData['email'];
             $customerId            = $customer->getId();
-            var_dump($customerEmail);
+//            var_dump($customerEmail);
             if (empty($customerUsercomUserId) || empty($customerUsercomKey)) {
                 $customerEntity = $this->customerRepository->getById($customerId);
                 $users          = $this->userComHelper->getUsersByEmail($customerEmail);
@@ -107,7 +112,7 @@ class SyncCustomer extends \Magento\Backend\App\Action
 //                    $this->userComHelper->syncUserById($user->id, $customerData);
 //                }
             }
-//
+            $this->mapDataForUserCom($customerData, $customerEntity);
             $this->userComHelper->syncUserHash($customerData);
         }
 
@@ -120,5 +125,53 @@ class SyncCustomer extends \Magento\Backend\App\Action
         $result->setHttpResponseCode($code);
 
         return $result->setData(['status' => $message]);
+    }
+
+    public function mapDataForUserCom(&$customerData, $customerEntity)
+    {
+        $fieldsMap = $this->helper->getFieldMapping();
+        foreach ($fieldsMap as $field) {
+            $fieldName = $field["name"];
+            if (isset($field["mapping"]) && $field["mapping"] == "automatic") {
+                switch ($fieldName) {
+                    case "orders_ltv":
+                        $customerData[$fieldName] = $this->getOrdersLtv($customerEntity);
+                        break;
+                    case "orders_aov":
+                        $customerData[$fieldName] = $this->getOrdersAov($customerEntity);
+                        break;
+                    case "orders_count":
+                        $customerData[$fieldName] = $this->getOrdersCount($customerEntity);
+                        break;
+                    case "marketing_allow":
+                        $customerData[$fieldName] = $this->getMarketingAllow($customerEntity);
+                        break;
+                }
+            }
+        }
+    }
+
+    public function getOrdersLtv(&$customerEntity): float
+    {
+        //TODO implement getOrdersLtv
+        return 0;
+    }
+
+    public function getOrdersAov(&$customerEntity): float
+    {
+        //TODO implement getOrdersAov
+        return 0;
+    }
+
+    public function getOrdersCount(&$customerEntity): float
+    {
+        //TODO implement getOrdersCount
+        return 0;
+    }
+
+    public function getMarketingAllow(&$customerEntity): float
+    {
+        //TODO implement getMarketingAllow
+        return 1;
     }
 }

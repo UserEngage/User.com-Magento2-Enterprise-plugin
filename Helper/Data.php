@@ -11,7 +11,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_API = 'usercom/general/api';
     const XML_SUBDOMAIN = 'usercom/general/subdomain';
     const XML_SENDSTORESOURCE = 'usercom/general/sendStoreSource';
-    const XML_FIELD_MAPPING = 'usercom/general/fieldMapping';
+    const XML_FIELD_MAPPING = 'usercom/sync/fieldMapping';
 
     /**
      * @param \Magento\Framework\App\Helper\Context $context

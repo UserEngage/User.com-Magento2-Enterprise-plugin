@@ -2,8 +2,6 @@
 
 namespace Usercom\Analytics\Helper;
 
-use Modules\Identity\Command\App\Support\Helpers\UserUniqueIdCreator;
-
 class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const COOKIE_USERKEY = "userKey";
@@ -144,6 +142,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function mapDataForUsercom($data): array
     {
+        $fieldsMap               = $this->helper->getFieldMapping();
         $mappedData              = [];
         $mappedData['email']     = $data['email'];
         $mappedData['user_id']   = $data['usercom_user_id'];
@@ -159,6 +158,13 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $mappedData['account_is_active']  = $data['is_active'];
         $mappedData['First name']         = $data['firstname'];
         $mappedData['Last name']          = $data['lastname'];
+        foreach ($fieldsMap ?? [] as $field) {
+            if (isset($data[$field['name']])) {
+                if ($field['mapping'] === 'automatic') {
+                    $mappedData[$field['name']] = $data[$field['name']];
+                }
+            }
+        }
 
         return $mappedData;
     }
