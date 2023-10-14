@@ -7,16 +7,16 @@
               class="Usercom\Analytics\Model\CustomerSync"
               method="syncCustomerById"/>
 
-    <consumer name="usercom.customer"
+    <consumer name="usercom.customer.sync"
               connection="amqp"
-              queue="usercom.customer.sync"
+              queue="customer_sync_queue"
               class="Usercom\Analytics\Model\CustomerSync"
               method="syncCustomerById"/>
 
     <consumer name="usercom.customer.logger"
               connection="amqp"
-              queue="usercom.customer.sync.logger"
+              queue="responseQueue.usercom.customer.sync"
               handler="LoggerClass::log"
               class="Usercom\Analytics\Model\CustomerSync"
-              method="syncCustomerById"/>
+              method="Log"/>
 </config>

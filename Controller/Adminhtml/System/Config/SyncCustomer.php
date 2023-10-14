@@ -10,25 +10,25 @@ class SyncCustomer extends \Magento\Backend\App\Action
     protected \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository;
     protected \Usercom\Analytics\Helper\Data $helper;
     protected \Magento\Framework\MessageQueue\PublisherInterface $publisher;
-    protected \Magento\Customer\Model\ResourceModel\Customer\Collection $collectionFactory;
+    protected \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory;
 
     public function __construct(
         \Usercom\Analytics\Helper\Data $helper,
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Usercom\Analytics\Block\System\Config\SyncTime $syncTime,
-        \Magento\Customer\Model\ResourceModel\Customer\Collection $collectionFactory,
         \Usercom\Analytics\Helper\Usercom $userComHelper,
         \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository,
-        \Magento\Framework\MessageQueue\PublisherInterface $publisher
+        \Magento\Framework\MessageQueue\PublisherInterface $publisher,
+        \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
     ) {
         $this->helper             = $helper;
         $this->resultJsonFactory  = $resultJsonFactory;
         $this->syncTimeArray      = $syncTime->toOptionArray();
-        $this->collectionFactory  = $collectionFactory;
         $this->userComHelper      = $userComHelper;
         $this->customerRepository = $customerRepository;
         $this->publisher          = $publisher;
+        $this->collectionFactory  = $collectionFactory;
         parent::__construct($context);
     }
 
@@ -53,71 +53,73 @@ class SyncCustomer extends \Magento\Backend\App\Action
         }
 
         $API            = $this->helper->getApi();
-//        $customersQuery = $this->collectionFactory->addAttributeToSelect("created_at")
-//                                                  ->addAttributeToSelect("id")
-//                                                  ->addAttributeToSelect("usercom_user_id")
-//                                                  ->addAttributeToSelect("usercom_user_key");
-//        if ($from !== null) {
-//            $customersQuery->addAttributeToFilter('created_at', ['from' => $from]);
-//        }
-//        if ($lastDay !== null) {
-//            $customersQuery->addAttributeToFilter('updated_at ', ['from' => $from]);
-//        }
-//        $customers = $customersQuery->load();
-////        var_dump($customers);
-////        die;
-//        $errorMessage = "";
-//
-//        foreach ($customers as $customer) {
-//            $customerData          = $customer->getData();
-//            $customerUsercomUserId = $customerData['usercom_user_id'] ?? null;
-//            $customerUsercomKey    = $customerData['usercom_key'] ?? null;
-//            $customerEmail         = $customerData['email'];
-//            $customerId            = $customer->getId();
-////            var_dump($customerEmail);
-//            if (empty($customerUsercomUserId) || empty($customerUsercomKey)) {
-//                $customerEntity = $this->customerRepository->getById($customerId);
-//                $users          = $this->userComHelper->getUsersByEmail($customerEmail);
-//                $user           = null;
-//                foreach ($users ?? [] as $u) {
-//                    if ($u->custom_id == $customerUsercomUserId) {
-//                        $user = $u;
-//                    }
-//                }
-//                unset($u);
-//
-//                if ($user === null) {
-//                    $user = $this->userComHelper->getCustomerByCustomId($customerUsercomUserId);
-//                }
-//                if ($user === null && $users) {
-//                    $user = $users[0];
-//                }
-//                $hash = null;
+        $customersQuery = $this->collectionFactory->create()
+                                                  ->addAttributeToSelect("created_at")
+                                                  ->addAttributeToSelect("id")
+                                                  ->addAttributeToSelect("usercom_user_id")
+                                                  ->addAttributeToSelect("usercom_user_key");
+        if ($from !== null) {
+            $customersQuery->addAttributeToFilter('created_at', ['from' => $from]);
+        }
+        if ($lastDay !== null) {
+            $customersQuery->addAttributeToFilter('updated_at ', ['from' => $from]);
+        }
+        $customers = $customersQuery->load();
+//        var_dump($customers);
+//        die;
+        $errorMessage = "";
+
+        foreach ($customers as $customer) {
+            $customerData          = $customer->getData();
+            $customerUsercomUserId = $customerData['usercom_user_id'] ?? null;
+            $customerUsercomKey    = $customerData['usercom_key'] ?? null;
+            $customerEmail         = $customerData['email'];
+            $customerId            = $customer->getId();
+//            var_dump($customerEmail);
+            if (empty($customerUsercomUserId) || empty($customerUsercomKey)) {
+                $customerEntity = $this->customerRepository->getById($customerId);
+                $users          = $this->userComHelper->getUsersByEmail($customerEmail);
+                $user           = null;
+                foreach ($users ?? [] as $u) {
+                    if ($u->custom_id == $customerUsercomUserId) {
+                        $user = $u;
+                    }
+                }
+                unset($u);
+
+                if ($user === null) {
+                    $user = $this->userComHelper->getCustomerByCustomId($customerUsercomUserId);
+                }
+                if ($user === null && $users) {
+                    $user = $users[0];
+                }
+                $hash = null;
+                if ($user !== null) {
+                    $hash = $user->custom_id ?? null;
+                }
+                if (empty($hash)) {
+                    $hash = $this->userComHelper->getUserHash($customerId);
+                }
+                $customerData['usercom_user_id'] = $hash;
+                $customerEntity->setCustomAttribute(
+                    'usercom_user_id',
+                    $hash
+                );
+                if ($user !== null) {
+                    $customerEntity->setCustomAttribute(
+                        'usercom_key',
+                        $user->user_key
+                    );
+                }
+                $this->customerRepository->save($customerEntity);
 //                if ($user !== null) {
-//                    $hash = $user->custom_id ?? null;
+//                    $this->userComHelper->syncUserById($user->id, $customerData);
 //                }
-//                if (empty($hash)) {
-//                    $hash = $this->userComHelper->getUserHash($customerId);
-//                }
-//                $customerData['usercom_user_id'] = $hash;
-//                $customerEntity->setCustomAttribute(
-//                    'usercom_user_id',
-//                    $hash
-//                );
-//                if ($user !== null) {
-//                    $customerEntity->setCustomAttribute(
-//                        'usercom_key',
-//                        $user->user_key
-//                    );
-//                }
-//                $this->customerRepository->save($customerEntity);
-////                if ($user !== null) {
-////                    $this->userComHelper->syncUserById($user->id, $customerData);
-////                }
-//            }
-//
-//            $this->publisher->publish('customer.sync', $customerId);
-//        }
+            }
+
+            $messageData = json_encode(['customerId' => $customerId, 'data' => $customerData]);
+            $this->publisher->publish('usercom.customer.sync', $messageData);
+        }
 
         return ( ! empty($errorMessage)) ? $this->result($errorMessage, 409) : $this->result("Success", 200);
     }

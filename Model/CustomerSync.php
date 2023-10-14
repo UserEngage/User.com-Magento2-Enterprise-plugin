@@ -11,19 +11,41 @@ class CustomerSync
     public function __construct(
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
         \Usercom\Analytics\Helper\Usercom $helper,
-        \Usercom\Analytics\Helper\Data $dataHelper
+        \Usercom\Analytics\Helper\Data $dataHelper,
+        \Psr\Log\LoggerInterface $logger
     ) {
         $this->customerRepository = $customerRepository;
         $this->helper             = $helper;
         $this->dataHelper         = $dataHelper;
+        $this->loggger            = $logger;
     }
 
-    public function syncCustomerById($customerId, $data)
+    /**
+     * @param string $message
+     *
+     * @return void
+     */
+    public function log(string $message)
     {
-        // Process the message
-//        $customerEntity = $this->customerRepository->getById($customerId);
-//        $this->mapDataForUserCom($data, $customerEntity);
-//        $this->helper->syncUserHash($data);
+        $this->loggger->info("CustomerSync", [$message]);
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return void
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function syncCustomerById(string $message): void
+    {
+        $message    = json_decode($message, true);
+        $customerId = $message['customerId'];
+        $data       = $message['data'];
+//         Process the message
+        $customerEntity = $this->customerRepository->getById($customerId);
+        $this->mapDataForUserCom($data, $customerEntity);
+        $this->helper->syncUserHash($data);
     }
 
 
