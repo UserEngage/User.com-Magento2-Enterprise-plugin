@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="customer_sync_consumer"
+              queue="customer_sync_queue"
+              connection="amqp"
+              class="Usercom\Analytics\Model\CustomerSync"
+              method="syncCustomerById"/>
+
+    <consumer name="usercom.customer"
+              connection="amqp"
+              queue="usercom.customer.sync"
+              class="Usercom\Analytics\Model\CustomerSync"
+              method="syncCustomerById"/>
+
+    <consumer name="usercom.customer.logger"
+              connection="amqp"
+              queue="usercom.customer.sync.logger"
+              handler="LoggerClass::log"
+              class="Usercom\Analytics\Model\CustomerSync"
+              method="syncCustomerById"/>
+</config>
