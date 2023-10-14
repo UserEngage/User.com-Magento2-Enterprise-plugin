@@ -11,7 +11,7 @@ class CustomerSync
     public function __construct(
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
         \Usercom\Analytics\Helper\Usercom $helper,
-        \Usercom\Analytics\Helper\Data $dataHelper,
+        \Usercom\Analytics\Helper\Data $dataHelper
     ) {
         $this->customerRepository = $customerRepository;
         $this->helper             = $helper;
@@ -21,11 +21,9 @@ class CustomerSync
     public function syncCustomerById($customerId, $data)
     {
         // Process the message
-
-        $customerEntity = $this->customerRepository->getById($customerId);
-
-        $this->mapDataForUserCom($data, $customerEntity);
-        $this->helper->syncUserHash($data);
+//        $customerEntity = $this->customerRepository->getById($customerId);
+//        $this->mapDataForUserCom($data, $customerEntity);
+//        $this->helper->syncUserHash($data);
     }
 
 
