@@ -6,7 +6,6 @@ class SyncCustomer extends \Magento\Backend\App\Action
 {
     protected \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory;
     protected array $syncTimeArray;
-    protected \Magento\Customer\Model\CustomerFactory $customerFactory;
     protected \Usercom\Analytics\Helper\Usercom $userComHelper;
     protected \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository;
     protected \Usercom\Analytics\Helper\Data $helper;
@@ -18,7 +17,6 @@ class SyncCustomer extends \Magento\Backend\App\Action
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Usercom\Analytics\Block\System\Config\SyncTime $syncTime,
-        \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Customer\Model\ResourceModel\Customer\Collection $collectionFactory,
         \Usercom\Analytics\Helper\Usercom $userComHelper,
         \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository,
@@ -27,7 +25,6 @@ class SyncCustomer extends \Magento\Backend\App\Action
         $this->helper             = $helper;
         $this->resultJsonFactory  = $resultJsonFactory;
         $this->syncTimeArray      = $syncTime->toOptionArray();
-        $this->customerFactory    = $customerFactory;
         $this->collectionFactory  = $collectionFactory;
         $this->userComHelper      = $userComHelper;
         $this->customerRepository = $customerRepository;
@@ -67,8 +64,8 @@ class SyncCustomer extends \Magento\Backend\App\Action
             $customersQuery->addAttributeToFilter('updated_at ', ['from' => $from]);
         }
         $customers = $customersQuery->load();
-        var_dump($customers);
-        die;
+//        var_dump($customers);
+//        die;
         $errorMessage = "";
 
         foreach ($customers as $customer) {
