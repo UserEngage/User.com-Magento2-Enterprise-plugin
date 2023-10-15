@@ -4,7 +4,7 @@ namespace Usercom\Analytics\Helper;
 
 class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 {
-    const COOKIE_USERKEY = "userKey";
+    const COOKIE_USERKEY = "__ca__chat";
 //    const COOKIE_USER_ID = "userComUserId";
     const DEBUG_USERCOM = true;
     protected $helper;
@@ -240,5 +240,43 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         return [];
+    }
+
+    public function createProduct($data)
+    {
+        return $this->sendCurl("products/", 'POST', $data);
+    }
+
+    public function getUsercomProductId($productId = null)
+    {
+        if ( ! $productId) {
+            return false;
+        }
+        $this->logger->info("Product Custom ID:", ['custom_id' => $productId]);
+
+        $usercomProduct = $this->getProductByCustomId($productId);
+        $this->logger->info("Usercom Product ID:", ['usercomProductId' => $usercomProduct->id ?? null]);
+
+        return $usercomProduct->id ?? null;
+    }
+
+    public function getProductByCustomId($custom_id)
+    {
+        return $this->sendCurl("products-by-id/$custom_id/details/");
+    }
+
+    public function getFrontUserKey()
+    {
+        return $this->cookieManager->getCookie(self::COOKIE_USERKEY);
+    }
+
+    public function createProductEvent($id, $data)
+    {
+        return $this->sendCurl("products/$id/product_event/", 'POST', $data);
+    }
+
+    public function getUserByUserKey(string $usercomKey)
+    {
+        return $this->sendCurl("users/search/?key=" . $usercomKey, 'GET');
     }
 }

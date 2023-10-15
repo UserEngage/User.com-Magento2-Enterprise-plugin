@@ -3,5 +3,7 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
     <exchange name="magento">
         <binding id="bindCustomerSync" topic="usercom.customer.sync" destination="usercom.customer.sync"/>
+        <binding id="bindCatalogProductEvent" topic="usercom.catalog.product.event"
+                 destination="usercom.catalog.product.event"/>
     </exchange>
 </config>

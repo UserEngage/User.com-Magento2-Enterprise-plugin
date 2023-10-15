@@ -4,4 +4,7 @@
     <consumer name="usercom.customer.sync"
               queue="usercom.customer.sync"
               handler="Usercom\Analytics\Model\CustomerSync::syncCustomerById"/>
+    <consumer name="usercom.catalog.product.event"
+              queue="usercom.catalog.product.event"
+              handler="Usercom\Analytics\Model\CatalogSync::productEvent"/>
 </config>

@@ -4,4 +4,7 @@
     <topic name="usercom.customer.sync" request="string">
         <handler name="usercomCustomerSync" type="Usercom\Analytics\Model\CustomerSync" method="syncCustomerById"/>
     </topic>
+    <topic name="usercom.catalog.product.event" request="string">
+        <handler name="usercomCatalogProductEvent" type="Usercom\Analytics\Model\CatalogSync" method="productEvent"/>
+    </topic>
 </config>

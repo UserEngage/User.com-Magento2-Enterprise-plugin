@@ -6,42 +6,34 @@ class SyncCustomer extends \Magento\Backend\App\Action
 {
     protected \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory;
     protected array $syncTimeArray;
-    protected \Usercom\Analytics\Helper\Usercom $userComHelper;
-    protected \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository;
-    protected \Usercom\Analytics\Helper\Data $helper;
     protected \Magento\Framework\MessageQueue\PublisherInterface $publisher;
     protected \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory;
 
     public function __construct(
-        \Usercom\Analytics\Helper\Data $helper,
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
         \Usercom\Analytics\Block\System\Config\SyncTime $syncTime,
-        \Usercom\Analytics\Helper\Usercom $userComHelper,
-        \Magento\Customer\Model\ResourceModel\CustomerRepository $customerRepository,
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
         \Magento\Customer\Model\ResourceModel\Customer\CollectionFactory $collectionFactory
     ) {
-        $this->helper             = $helper;
-        $this->resultJsonFactory  = $resultJsonFactory;
-        $this->syncTimeArray      = $syncTime->toOptionArray();
-        $this->userComHelper      = $userComHelper;
-        $this->customerRepository = $customerRepository;
-        $this->publisher          = $publisher;
-        $this->collectionFactory  = $collectionFactory;
+        $this->resultJsonFactory = $resultJsonFactory;
+        $this->syncTimeArray     = $syncTime->toOptionArray();
+        $this->publisher         = $publisher;
+        $this->collectionFactory = $collectionFactory;
         parent::__construct($context);
     }
 
-    public function execute()
+    public function execute(): \Magento\Framework\Controller\Result\Json
     {
-        $key     = $_POST["time"] ?? null;
-        $lastDay = $_POST["lastDat"] ?? null;
+        $errorMessage = "";
+        $key          = $_POST["time"] ?? null;
+        $lastDay      = $_POST["lastDat"] ?? null;
 
         if (is_null($key)) {
             return $this->result("Error: missing param", 400);
         }
         $key = (int)$key;
-        if ( ! isset($this->syncTimeArray[$key])) {
+        if (! isset($this->syncTimeArray[$key])) {
             return $this->result("Error: bad time", 400);
         }
         $optionValue = $this->syncTimeArray[$key]["value"];
@@ -52,7 +44,6 @@ class SyncCustomer extends \Magento\Backend\App\Action
             $from = date('Y-m-d h:i:s', strtotime($optionTime));
         }
 
-        $API            = $this->helper->getApi();
         $customersQuery = $this->collectionFactory->create()
                                                   ->addAttributeToSelect("created_at")
                                                   ->addAttributeToSelect("id")
@@ -64,17 +55,19 @@ class SyncCustomer extends \Magento\Backend\App\Action
         if ($lastDay !== null) {
             $customersQuery->addAttributeToFilter('updated_at ', ['from' => $from]);
         }
-        $customers    = $customersQuery->load();
-        $errorMessage = "";
-
-        foreach ($customers as $customer) {
-            $this->publisher->publish('usercom.customer.sync', $customer->getId());
+        $customers = $customersQuery->load();
+        try {
+            foreach ($customers ?? [] as $customer) {
+                $this->publisher->publish('usercom.customer.sync', $customer->getId());
+            }
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
         }
 
         return ( ! empty($errorMessage)) ? $this->result($errorMessage, 409) : $this->result("Success", 200);
     }
 
-    public function result($message, $code)
+    public function result($message, $code): \Magento\Framework\Controller\Result\Json
     {
         $result = $this->resultJsonFactory->create();
         $result->setHttpResponseCode($code);

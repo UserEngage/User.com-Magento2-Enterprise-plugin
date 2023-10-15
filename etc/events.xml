@@ -6,4 +6,8 @@
     <event name="customer_login">
         <observer instance="Usercom\Analytics\Observer\Customer\Login" name="usercom_customer_login" />
     </event>
+        <event name="controller_action_predispatch_catalog_product_view">
+            <observer instance="Usercom\Analytics\Observer\Catalog\ControllerProductView"
+                      name="usercom_catalog_controller_product_view"/>
+        </event>
 </config>
