@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
-    <exchange name="customer_sync_exchange" type="topic" connection="amqp">
-        <binding id="bindCustomerSync" topic="usercom.customer.sync" destinationType="queue" destination="customer_sync_queue"/>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+    <exchange name="magento">
+        <binding id="bindCustomerSync" topic="usercom.customer.sync" destination="usercom.customer.sync"/>
     </exchange>
 </config>

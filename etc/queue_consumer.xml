@@ -2,8 +2,6 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
     <consumer name="usercom.customer.sync"
-              connection="amqp"
-              queue="customer_sync_queue"
-              class="Usercom\Analytics\Model\CustomerSync"
-              method="syncCustomerById"/>
+              queue="usercom.customer.sync"
+              handler="Usercom\Analytics\Model\CustomerSync::syncCustomerById"/>
 </config>

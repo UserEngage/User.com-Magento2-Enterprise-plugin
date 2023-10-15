@@ -27,7 +27,8 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Customer\Model\Customer $customer,
         \Magento\Catalog\Model\Product $product,
         \Magento\Framework\App\ResourceConnection $resourceConnection,
-        \Magento\Framework\App\Helper\Context $context
+        \Magento\Framework\App\Helper\Context $context,
+        \Psr\Log\LoggerInterface $logger
     ) {
         $this->helper                   = $helper;
         $this->cookieManager            = $cookieManager;
@@ -38,6 +39,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $this->customer                 = $customer;
         $this->product                  = $product;
         $this->resourceConnection       = $resourceConnection;
+        $this->logger                   = $logger;
         parent::__construct($context);
     }
 
@@ -104,7 +106,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $err      = curl_error($curl);
         $me       = microtime(true);
 
-        $this->logRequest('sendCurl' . $method, $url, [], $me - $ms, $response);
+        $this->logRequest('sendCurl' . $method, $url, $data, $me - $ms, $response);
         if ( ! empty($err)) {
             $this->logError('sendCurl' . $method, $url, $err, $response);
         }
@@ -121,10 +123,9 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     private function logRequest($name, $url, $data, $mt, $response): void
     {
         if (self::DEBUG_USERCOM) {
-            file_put_contents(
-                '/var/www/var/log/usercom.log',
-                $name . ': ' . $mt . "\n" . $url . "\nREQUEST:   " . json_encode($data) . "\nRESPONSE:   " . $response . "\n\n\n\n\n",
-                FILE_APPEND
+            $this->logger->info(
+                "Usercom",
+                [$name . ': ' . $mt . "\n" . $url . "\nREQUEST:   " . json_encode($data) . "\nRESPONSE:   " . $response . "\n\n\n\n\n"]
             );
         }
     }
@@ -132,10 +133,9 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     private function logError(string $name, $url, string $err, $response)
     {
         if (self::DEBUG_USERCOM) {
-            file_put_contents(
-                '/var/www/var/log/usercom.log',
-                $name . 'Error: ' . "\n" . $url . "\n" . json_encode($err) . "\n" . json_encode($response) . "\n",
-                FILE_APPEND
+            $this->logger->error(
+                "Usercom Error",
+                [$name . 'Error: ' . "\n" . $url . "\n" . json_encode($err) . "\n" . json_encode($response) . "\n"]
             );
         }
     }
@@ -155,7 +155,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 //        $mappedData['paywall_days_left']      = $daysLeft;
 //        $mappedData['account_ltv']            = $data['total'];
         $mappedData['account_created_at'] = $data['created_at'];
-        $mappedData['account_is_active']  = $data['is_active'];
+        $mappedData['account_is_active']  = ! empty($data['confirmation']);
         $mappedData['First name']         = $data['firstname'];
         $mappedData['Last name']          = $data['lastname'];
         foreach ($fieldsMap ?? [] as $field) {

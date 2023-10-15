@@ -64,61 +64,11 @@ class SyncCustomer extends \Magento\Backend\App\Action
         if ($lastDay !== null) {
             $customersQuery->addAttributeToFilter('updated_at ', ['from' => $from]);
         }
-        $customers = $customersQuery->load();
-//        var_dump($customers);
-//        die;
+        $customers    = $customersQuery->load();
         $errorMessage = "";
 
         foreach ($customers as $customer) {
-            $customerData          = $customer->getData();
-            $customerUsercomUserId = $customerData['usercom_user_id'] ?? null;
-            $customerUsercomKey    = $customerData['usercom_key'] ?? null;
-            $customerEmail         = $customerData['email'];
-            $customerId            = $customer->getId();
-//            var_dump($customerEmail);
-            if (empty($customerUsercomUserId) || empty($customerUsercomKey)) {
-                $customerEntity = $this->customerRepository->getById($customerId);
-                $users          = $this->userComHelper->getUsersByEmail($customerEmail);
-                $user           = null;
-                foreach ($users ?? [] as $u) {
-                    if ($u->custom_id == $customerUsercomUserId) {
-                        $user = $u;
-                    }
-                }
-                unset($u);
-
-                if ($user === null) {
-                    $user = $this->userComHelper->getCustomerByCustomId($customerUsercomUserId);
-                }
-                if ($user === null && $users) {
-                    $user = $users[0];
-                }
-                $hash = null;
-                if ($user !== null) {
-                    $hash = $user->custom_id ?? null;
-                }
-                if (empty($hash)) {
-                    $hash = $this->userComHelper->getUserHash($customerId);
-                }
-                $customerData['usercom_user_id'] = $hash;
-                $customerEntity->setCustomAttribute(
-                    'usercom_user_id',
-                    $hash
-                );
-                if ($user !== null) {
-                    $customerEntity->setCustomAttribute(
-                        'usercom_key',
-                        $user->user_key
-                    );
-                }
-                $this->customerRepository->save($customerEntity);
-//                if ($user !== null) {
-//                    $this->userComHelper->syncUserById($user->id, $customerData);
-//                }
-            }
-
-            $messageData = json_encode(['customerId' => $customerId, 'data' => $customerData]);
-            $this->publisher->publish('usercom.customer.sync', $messageData);
+            $this->publisher->publish('usercom.customer.sync', $customer->getId());
         }
 
         return ( ! empty($errorMessage)) ? $this->result($errorMessage, 409) : $this->result("Success", 200);
