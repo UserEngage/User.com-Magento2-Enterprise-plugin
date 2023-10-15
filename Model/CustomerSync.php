@@ -17,7 +17,7 @@ class CustomerSync
         $this->customerRepository = $customerRepository;
         $this->helper             = $helper;
         $this->dataHelper         = $dataHelper;
-        $this->loggger            = $logger;
+        $this->logger             = $logger;
     }
 
     /**
@@ -27,7 +27,7 @@ class CustomerSync
      */
     public function log(string $message)
     {
-        $this->loggger->info("CustomerSync", [$message]);
+        $this->logger->info("CustomerSync", [$message]);
     }
 
     /**
@@ -39,7 +39,7 @@ class CustomerSync
      */
     public function syncCustomerById(string $customerId): void
     {
-        $this->loggger->info("CustomerSync", ['customerId:' => $customerId]);
+        $this->logger->info("CustomerSync", ['customerId:' => $customerId]);
         $customerId = $customerId ?? null;
         if ($customerId !== null) {
             $customer = $this->customerRepository->getById($customerId);
@@ -50,7 +50,7 @@ class CustomerSync
             $data['usercom_user_id'] = $customerUsercomUserId;
             $data['usercom_key']     = $customerUsercomKey;
 
-            $this->loggger->info("CustomerSync customAttrId:", $data);
+            $this->logger->info("CustomerSync customAttrId:", $data);
 
             $customerEmail = $customer->getEmail();
             $customerId    = $customer->getId();
@@ -97,9 +97,9 @@ class CustomerSync
 
             $this->mapDataForUserCom($data, $customer);
             $this->helper->syncUserHash($data);
-            $this->loggger->info("CustomerSync EOF", $data);
+            $this->logger->info("CustomerSync EOF", $data);
         }
-        $this->loggger->info("CustomerSync EOF",);
+        $this->logger->info("CustomerSync EOF", []);
     }
 
     public function mapDataForUserCom(&$customerData, $customer)
