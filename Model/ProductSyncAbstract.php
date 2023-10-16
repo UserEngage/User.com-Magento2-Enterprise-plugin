@@ -53,7 +53,7 @@ class ProductSyncAbstract
         $productData = $product->getData();
 
         if (isset($productData['extension_attributes']) &&
-            (! property_exists($productData['extension_attributes'], 'usercom_product_id') ||
+            ( ! property_exists($productData['extension_attributes'], 'usercom_product_id') ||
               empty($productData['extension_attributes']->usercom_product_id))
         ) {
             $this->logger->info("extension_attributes usercom_product_id is empty");
@@ -78,7 +78,7 @@ class ProductSyncAbstract
     {
         $media = $product->getMediaGalleryEntries();
 
-        $fileUrl = (! empty($media[0])) ? $media[0]->getFile() : null;
+        $fileUrl = ( ! empty($media[0])) ? $media[0]->getFile() : null;
         $data    = [
             "custom_id"   => $this->helper::PRODUCT_PREFIX . $product->getId(),
             'name'        => $product->getName(),
@@ -94,13 +94,13 @@ class ProductSyncAbstract
     }
 
     /**
-     * @param mixed $productId
-     * @param mixed $productEventData
-     * @param mixed $usercomKey
+     * @param int $productId
+     * @param array $productEventData
+     * @param string|null $usercomKey
      *
      * @return array
      */
-    protected function getEventData(mixed $productId, mixed $productEventData, mixed $usercomKey): array
+    protected function getEventData(int $productId, array $productEventData, string $usercomKey = null): array
     {
         //            if ( ! empty($usercomUserId)) {
 //                $data["custom_id"] = $usercomUserId ?? null;
