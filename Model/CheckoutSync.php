@@ -2,8 +2,9 @@
 
 namespace Usercom\Analytics\Model;
 
-class CatalogSync extends ProductSyncAbstract
+class CheckoutSync extends ProductSyncAbstract
 {
+
     /**
      * @param string $message
      *
@@ -13,7 +14,7 @@ class CatalogSync extends ProductSyncAbstract
      */
     public function productEvent(string $message): void
     {
-        $this->eventType = $this->helper::PRODUCT_EVENT_VIEW;
+        $this->eventType = $this->helper::PRODUCT_EVENT_ADD_TO_CART;
         list($productId, $usercomUserId, $usercomKey) = $this->extractParams($message);
 
         $this->logger->info(
@@ -39,4 +40,6 @@ class CatalogSync extends ProductSyncAbstract
         }
         $this->logger->info("CatalogSync EOF", []);
     }
+
+
 }
