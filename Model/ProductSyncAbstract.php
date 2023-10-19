@@ -29,10 +29,49 @@ class ProductSyncAbstract
      * @param string $message
      *
      * @return void
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    protected function log(string $message)
+    protected function productEvent(string $message): void
     {
-        $this->logger->info("CatalogSync", [$message]);
+        if ( ! $this->dataHelper->isModuleEnabled()) {
+            return;
+        }
+        list($productId, $usercomUserId, $usercomKey) = $this->extractParams($message);
+
+        $this->logger->info(
+            "CheckoutEvent: " . $this->eventType,
+            [
+                'productId:'      => $productId,
+                'usercom_user_id' => $usercomUserId ?? null,
+                'usercom_key'     => $usercomKey ?? null,
+                'moduleEnabled'   => $this->dataHelper->isModuleEnabled(),
+
+            ]
+        );
+
+        if ($productId !== null) {
+            list($productEventData, $usercomProductId) = $this->prepareProduct($productId);
+
+            $data         = $this->getEventData($productId, $productEventData, $usercomKey);
+            $eventReponse = $this->helper->createProductEvent($usercomProductId, $data);
+            $this->logger->info("CheckoutEventResponse: " . $this->eventType, [json_encode($eventReponse)]);
+        }
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return array
+     */
+    protected function extractParams(string $message): array
+    {
+        $messageData   = json_decode($message, true);
+        $productId     = $messageData['productId'];
+        $usercomUserId = $messageData['usercom_user_id'];
+        $usercomKey    = $messageData['user_key'];
+
+        return [$productId, $usercomUserId, $usercomKey];
     }
 
     /**
@@ -120,15 +159,10 @@ class ProductSyncAbstract
     /**
      * @param string $message
      *
-     * @return array
+     * @return void
      */
-    protected function extractParams(string $message): array
+    protected function log(string $message)
     {
-        $messageData   = json_decode($message, true);
-        $productId     = $messageData['productId'];
-        $usercomUserId = $messageData['usercom_user_id'];
-        $usercomKey    = $messageData['user_key'];
-
-        return [$productId, $usercomUserId, $usercomKey];
+        $this->logger->info("CatalogSync", [$message]);
     }
 }

@@ -6,5 +6,11 @@
               handler="Usercom\Analytics\Model\CustomerSync::syncCustomerById"/>
     <consumer name="usercom.catalog.product.event"
               queue="usercom.catalog.product.event"
-              handler="Usercom\Analytics\Model\CatalogSync::productEvent"/>
+              handler="Usercom\Analytics\Model\CatalogSync::productView"/>
+    <consumer name="usercom.checkout.product.add"
+              queue="usercom.checkout.product.add"
+              handler="Usercom\Analytics\Model\CheckoutSync::addToCart"/>
+    <consumer name="usercom.checkout.product.purchase"
+              queue="usercom.checkout.product.purchase"
+              handler="Usercom\Analytics\Model\CheckoutSync::purchase"/>
 </config>
