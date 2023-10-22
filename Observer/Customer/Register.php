@@ -2,13 +2,20 @@
 
 namespace Usercom\Analytics\Observer\Customer;
 
-class RegisterSuccess extends EventAbstract implements \Magento\Framework\Event\ObserverInterface
+class Register extends EventAbstract implements \Magento\Framework\Event\ObserverInterface
 {
 
     public function execute(
         \Magento\Framework\Event\Observer $observer
     ) {
-        $this->generateUserComUserID($observer);
+        $userComUserId = $this->generateUserComUserID($observer);
+
+
+        $data = [
+            'usercom_user_id' => $userComUserId ?? null,
+            'user_key'        => $this->usercom->getFrontUserKey()
+        ];
+        $this->publisher->publish('usercom.customer.register', json_encode($data));
 
 //        if( !$this->helper->isModuleEnabled() || !($usercomCustomerId = $this->usercom->getUsercomCustomerId($customerId)) )
 //            return;

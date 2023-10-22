@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
     <publisher topic="usercom.customer.sync"/>
     <publisher topic="usercom.catalog.product.event"/>
+    <publisher topic="usercom.cart.product.add"/>
+    <publisher topic="usercom.cart.product.remove"/>
+    <publisher topic="usercom.order.purchase"/>
+    <publisher topic="usercom.cart.checkout"/>
 </config>

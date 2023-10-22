@@ -3,7 +3,10 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
     <exchange name="magento">
         <binding id="bindCustomerSync" topic="usercom.customer.sync" destination="usercom.customer.sync"/>
-        <binding id="bindCatalogProductEvent" topic="usercom.catalog.product.event"
-                 destination="usercom.catalog.product.event"/>
+        <binding id="bindCatalogProductEvent" topic="usercom.catalog.product.event" destination="usercom.catalog.product.event"/>
+        <binding id="bindCartProductAdd" topic="usercom.cart.product.add" destination="usercom.cart.product.add"/>
+        <binding id="bindCartProductRemove" topic="usercom.cart.product.remove" destination="usercom.cart.product.remove"/>
+        <binding id="bindCartCheckout" topic="usercom.cart.checkout" destination="usercom.cart.checkout"/>
+        <binding id="bindOrderPurchase" topic="usercom.order.purchase" destination="usercom.order.purchase"/>
     </exchange>
 </config>

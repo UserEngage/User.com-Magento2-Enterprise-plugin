@@ -9,6 +9,7 @@ abstract class EventAbstract
 {
     protected $helper;
     protected $usercom;
+    protected $publisher;
     protected CustomerRegistry $customerRegistry;
     protected CustomerRepository $customerRepository;
 
@@ -16,12 +17,14 @@ abstract class EventAbstract
         CustomerRegistry $customerRegistry,
         CustomerRepository $customerRepository,
         \Usercom\Analytics\Helper\Data $helper,
-        \Usercom\Analytics\Helper\Usercom $usercom
+        \Usercom\Analytics\Helper\Usercom $usercom,
+        \Magento\Framework\MessageQueue\PublisherInterface $publisher
     ) {
         $this->customerRegistry   = $customerRegistry;
         $this->customerRepository = $customerRepository;
         $this->helper             = $helper;
         $this->usercom            = $usercom;
+        $this->publisher          = $publisher;
     }
 
     protected function generateUserComUserID($observer)
@@ -53,5 +56,7 @@ abstract class EventAbstract
 
             $this->customerRepository->save($customerEntity);
         }
+
+        return $userUserId;
     }
 }

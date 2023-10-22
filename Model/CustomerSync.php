@@ -2,22 +2,18 @@
 
 namespace Usercom\Analytics\Model;
 
-class CustomerSync
+class CustomerSync extends CustomerSyncAbstract
 {
-    private \Usercom\Analytics\Helper\Usercom $helper;
-    private \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository;
-    private \Usercom\Analytics\Helper\Data $dataHelper;
 
-    public function __construct(
-        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
-        \Usercom\Analytics\Helper\Usercom $helper,
-        \Usercom\Analytics\Helper\Data $dataHelper,
-        \Psr\Log\LoggerInterface $logger
-    ) {
-        $this->customerRepository = $customerRepository;
-        $this->helper             = $helper;
-        $this->dataHelper         = $dataHelper;
-        $this->logger             = $logger;
+    /**
+     * @param string $message
+     *
+     * @return void
+     */
+    public function register(string $message): void
+    {
+        $this->eventType = $this->helper::EVENT_REGISTER;
+        $this->event($message);
     }
 
     /**
@@ -25,9 +21,21 @@ class CustomerSync
      *
      * @return void
      */
-    public function log(string $message)
+    public function login(string $message): void
     {
-        $this->logger->info("CustomerSync", [$message]);
+        $this->eventType = $this->helper::EVENT_LOGIN;
+        $this->event($message);
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return void
+     */
+    public function newsletter(string $message): void
+    {
+        $this->eventType = $this->helper::EVENT_NEWSLETTER_SIGN_UP;
+        $this->event($message);
     }
 
     /**

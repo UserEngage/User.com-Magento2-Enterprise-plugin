@@ -1,13 +1,14 @@
 <?php
 
-namespace Usercom\Analytics\Observer\Checkout;
+namespace Usercom\Analytics\Observer\Cart;
 
-class CartAddProductComplete implements \Magento\Framework\Event\ObserverInterface
+class Add implements \Magento\Framework\Event\ObserverInterface
 {
     private \Usercom\Analytics\Helper\Usercom $helper;
     private \Magento\Framework\App\RequestInterface $request;
     private \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurableProduct;
     private \Magento\Framework\MessageQueue\PublisherInterface $publisher;
+    private \Magento\Customer\Model\Session $customerSession;
 
     public function __construct(
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
@@ -20,6 +21,7 @@ class CartAddProductComplete implements \Magento\Framework\Event\ObserverInterfa
         $this->request             = $request;
         $this->configurableProduct = $configurableProduct;
         $this->publisher           = $publisher;
+        $this->customerSession     = $customerSession;
     }
 
     public function execute(
@@ -42,6 +44,6 @@ class CartAddProductComplete implements \Magento\Framework\Event\ObserverInterfa
             'usercom_user_id' => $userComUserId,
             'user_key'        => $this->helper->getFrontUserKey()
         ];
-        $this->publisher->publish('usercom.catalog.checkout.add', json_encode($data));
+        $this->publisher->publish('usercom.cart.product.add', json_encode($data));
     }
 }
