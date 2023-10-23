@@ -1,6 +1,6 @@
 <?php
 
-namespace Usercom\Analytics\Observer\Checkout;
+namespace Usercom\Analytics\Observer\Cart;
 
 class Checkout implements \Magento\Framework\Event\ObserverInterface
 {
@@ -30,14 +30,12 @@ class Checkout implements \Magento\Framework\Event\ObserverInterface
     public function execute(
         \Magento\Framework\Event\Observer $observer
     ) {
-//        $observer->getEvent();
         /** @var \Magento\Quote\Model\Quote $quote */
         $quote = $this->checkoutSession->getQuote();
-//        var_dump($observer->getEvent());
 
-//        $cart = [];
-//        /** @var \Magento\Quote\Model\Quote\Item $item */
+        $cart = [];
         foreach ($quote->getAllVisibleItems() as $item) {
+            /** @var \Magento\Quote\Model\Quote\Item $item */
             $cart[] = $this->_formatProduct($item);
         }
         $userComUserId = null;

@@ -44,16 +44,5 @@ class Remove implements \Magento\Framework\Event\ObserverInterface
             'user_key'        => $this->helper->getFrontUserKey()
         ];
         $this->publisher->publish('usercom.cart.product.remove', json_encode($data));
-
-//        $this->usercom->createProductEvent($usercomProductId, array(
-//            "id" => $usercomProductId,
-//            "user_custom_id" => ($this->customerSession->isLoggedIn()) ? base64_encode(
-//                $this->customerSession->getCustomer()->getId()
-//            ) : null,
-//            "user_id" => $usercomCustomerId,
-//            "data" => $this->usercom->getProductData($productId),
-//            "event_type" => "remove",
-//            "timestamp" => time()
-//        ));
     }
 }

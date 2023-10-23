@@ -7,6 +7,6 @@ class CatalogSync extends ProductSyncAbstract
     public function productView(string $message): void
     {
         $this->eventType = $this->helper::PRODUCT_EVENT_VIEW;
-        $this->productEvent($message);
+        $this->singleProductEvent($message);
     }
 }
