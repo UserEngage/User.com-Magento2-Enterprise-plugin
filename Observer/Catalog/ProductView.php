@@ -2,7 +2,7 @@
 
 namespace Usercom\Analytics\Observer\Catalog;
 
-class ControllerProductView implements \Magento\Framework\Event\ObserverInterface
+class ProductView implements \Magento\Framework\Event\ObserverInterface
 {
 
     protected $customerSession;
