@@ -33,21 +33,15 @@ class Checkout implements \Magento\Framework\Event\ObserverInterface
         /** @var \Magento\Quote\Model\Quote $quote */
         $quote = $this->checkoutSession->getQuote();
 
-        $cart = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
-            /** @var \Magento\Quote\Model\Quote\Item $item */
-            $cart[] = $this->_formatProduct($item);
-        }
         $userComUserId = null;
         if ($this->customerSession->isLoggedIn()) {
             $userComUserId = $this->customerSession->getCustomer()->getAttribute('usercom_user_id');
         }
-
         $data = [
-            'products'        => $cart,
-            'total'           => $quote->getGrandTotal(),
+            'quoteId'         => $quote->getId(),
             'usercom_user_id' => $userComUserId,
-            'user_key'        => $this->helper->getFrontUserKey()
+            'user_key'        => $this->helper->getFrontUserKey(),
+            'time'            => time()
         ];
         $this->publisher->publish('usercom.cart.checkout', json_encode($data));
     }

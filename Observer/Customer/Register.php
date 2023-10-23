@@ -13,7 +13,8 @@ class Register extends EventAbstract implements \Magento\Framework\Event\Observe
 
         $data = [
             'usercom_user_id' => $userComUserId ?? null,
-            'user_key'        => $this->usercom->getFrontUserKey()
+            'user_key'        => $this->usercom->getFrontUserKey(),
+            'time'            => time()
         ];
         $this->publisher->publish('usercom.customer.register', json_encode($data));
 

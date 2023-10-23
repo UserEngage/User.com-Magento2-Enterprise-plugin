@@ -28,7 +28,8 @@ class ProductView implements \Magento\Framework\Event\ObserverInterface
         $data = [
             'productId'       => $observer->getEvent()->getRequest()->getParam('id'),
             'usercom_user_id' => $userComUserId,
-            'user_key'        => $this->helper->getFrontUserKey()
+            'user_key'        => $this->helper->getFrontUserKey(),
+            'time'            => time()
         ];
         $this->publisher->publish('usercom.catalog.product.event', json_encode($data));
     }

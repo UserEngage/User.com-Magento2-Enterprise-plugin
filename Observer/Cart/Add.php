@@ -42,7 +42,8 @@ class Add implements \Magento\Framework\Event\ObserverInterface
         $data = [
             'productId'       => $productId,
             'usercom_user_id' => $userComUserId,
-            'user_key'        => $this->helper->getFrontUserKey()
+            'user_key'        => $this->helper->getFrontUserKey(),
+            'time'            => time()
         ];
         $this->publisher->publish('usercom.cart.product.add', json_encode($data));
     }

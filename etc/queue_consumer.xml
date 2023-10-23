@@ -16,16 +16,16 @@
     <consumer name="usercom.catalog.product.event"
               queue="usercom.catalog.product.event"
               handler="Usercom\Analytics\Model\CatalogSync::productView"/>
-    <consumer name="usercom.checkout.product.add"
-              queue="usercom.checkout.product.add"
+    <consumer name="usercom.cart.product.add"
+              queue="usercom.cart.product.add"
               handler="Usercom\Analytics\Model\CartSync::add"/>
-    <consumer name="usercom.checkout.product.purchase"
-              queue="usercom.checkout.product.purchase"
+    <consumer name="usercom.order.purchase"
+              queue="usercom.order.purchase"
               handler="Usercom\Analytics\Model\CartSync::purchase"/>
-    <consumer name="usercom.checkout.product.remove"
-              queue="usercom.checkout.product.remove"
+    <consumer name="usercom.cart.product.remove"
+              queue="usercom.cart.product.remove"
               handler="Usercom\Analytics\Model\CartSync::remove"/>
-    <consumer name="usercom.checkout.product.checkout"
-              queue="usercom.checkout.product.checkout"
+    <consumer name="usercom.cart.checkout"
+              queue="usercom.cart.checkout"
               handler="Usercom\Analytics\Model\CartSync::checkout"/>
 </config>

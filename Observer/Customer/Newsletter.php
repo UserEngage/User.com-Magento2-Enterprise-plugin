@@ -10,7 +10,7 @@ class Newsletter extends EventAbstract implements \Magento\Framework\Event\Obser
         $subscriber      = $observer->getEvent()->getSubscriber();
         $customerId      = $subscriber->getCustomerId();
         $subscribeStatus = ($subscriber->getStatus() == 1);
-        if (! empty($customerId)) {
+        if ( ! empty($customerId)) {
             $userComUserId = $this->generateUserComUserID($observer);
         }
 
@@ -18,7 +18,8 @@ class Newsletter extends EventAbstract implements \Magento\Framework\Event\Obser
             'usercom_user_id' => $userComUserId ?? null,
             'user_key'        => $this->usercom->getFrontUserKey(),
             "email"           => $subscriber->getSubscriberEmail(),
-            "subscribeStatus" => $subscribeStatus
+            "subscribeStatus" => $subscribeStatus,
+            'time'            => time()
         ];
         $this->publisher->publish('usercom.customer.newsletter', json_encode($data));
     }

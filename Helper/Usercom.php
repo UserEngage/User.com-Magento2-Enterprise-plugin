@@ -115,7 +115,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
             ],
         ]);
 
-        if (! empty($data)) {
+        if ( ! empty($data)) {
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
             curl_setopt($curl, CURLOPT_HTTPHEADER, [
                 "Accept: */*; version=2",
@@ -129,7 +129,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $me       = microtime(true);
 
         $this->logRequest('sendCurl' . $method, $url, $data, $me - $ms, $response);
-        if (! empty($err)) {
+        if ( ! empty($err)) {
             $this->logError('sendCurl' . $method, $url, $err, $response);
         }
         curl_close($curl);
@@ -213,7 +213,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     public function getUserByEmail($email)
     {
         $user = $this->sendCurl('users/search/?email=' . $email, 'GET');
-        if (! empty($user)) {
+        if ( ! empty($user)) {
             return $user;
         }
 
@@ -228,7 +228,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     public function getUsersByEmail($email): array
     {
         $users = $this->sendCurl('users/search/?email=' . $email . '&many=true', 'GET');
-        if (! empty($users)) {
+        if ( ! empty($users)) {
             return $users;
         }
 
@@ -238,7 +238,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     public function listAttributes()
     {
         $attributes = $this->sendCurl('attributes/', 'GET');
-        if (! empty($attributes)) {
+        if ( ! empty($attributes)) {
             return $attributes->results ?? [];
         }
 
@@ -257,7 +257,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $params['value_type']   = $valueType;
         $params['content_type'] = 'clientuser';
         $attributes             = $this->sendCurl('attributes/', 'POST', $params);
-        if (! empty($attributes)) {
+        if ( ! empty($attributes)) {
             return $attributes->results ?? [];
         }
 
@@ -271,7 +271,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getUsercomProductId($productId = null)
     {
-        if (! $productId) {
+        if ( ! $productId) {
             return false;
         }
         $this->logger->info("Product Custom ID:", ['custom_id' => $productId]);
@@ -299,9 +299,11 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function createEvent($data)
     {
-        if ($this->helper->sendStoreSource()) {
-            $data["data"]["store_source"] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/";
-        }
+//        if ($this->helper->sendStoreSource()) {
+//            $host                         = $_SERVER["HTTP_HOST"];
+//            $data["data"]["store_source"] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$host/";
+//        }
+        $this->logger->info("Event Data:", ['data' => $data]);
 
         return $this->sendCurl("events/", 'POST', $data);
     }

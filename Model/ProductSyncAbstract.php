@@ -66,7 +66,7 @@ class ProductSyncAbstract
         if ($productId !== null) {
             list($productEventData, $usercomProductId) = $this->prepareProduct($productId);
 
-            $data          = $this->getProductEventData($productId, $productEventData, $usercomKey);
+            $data          = $this->getProductEventData($productId, $productEventData, $usercomKey, $messageData['time'] ?? null);
             $eventResponse = $this->helper->createProductEvent($usercomProductId, $data);
             $this->logger->info("CheckoutEventResponse: " . $this->eventType, [json_encode($eventResponse)]);
         }
@@ -98,6 +98,7 @@ class ProductSyncAbstract
      */
     protected function prepareProduct(int $productId, $qty = 1, $price = null): array
     {
+        $this->logger->info("GetProductById", ['productId:' => $productId]);
         $product = $this->productRepository->getById($productId);
         $this->logger->info("PrepareProduct", ['productId:' => $productId]);
         $productEventData = $this->mapProductData($product, $qty, $price);
@@ -158,7 +159,7 @@ class ProductSyncAbstract
      */
     protected function getProductEventData(int $productId, array $productEventData, string $usercomKey = null, $time = null): array
     {
-        if ( ! empty($time)) {
+        if ( ! empty($time) && is_string($time) && ! is_numeric($time)) {
             $time = strtotime($time);
         }
 //            if ( ! empty($usercomUserId)) {
@@ -195,23 +196,36 @@ class ProductSyncAbstract
         $quote  = $this->quoteRepository->get($quoteId);
         $items  = $quote->getItems();
         $totals = $quote->getTotals();
+        if (isset($totals['tax']) && ! empty($totals['tax'])) {
+            $tax = $totals['tax']->getValue();
+        }
+        $step            = 1;
+        $shippingAddress = $quote->getShippingAddress();
+
         $this->log("CartEvent: " . $this->eventType, json_encode($totals));
         $cartEventData = [
+            'step'            => $step,
             'products'        => [],
-//            'tax'             => $totals['tax']->getValue(),
+            'tax'             => $tax,
             'revenue'         => $quote->getGrandTotal(),
-            'currency'        => $quote->getGrandTotal(),
-            'payment_method'  => $quote->getPayment()->getMethodInstance()->getTitle(),
+            'currency'        => $quote->getCurrency(),
+            'payment_method'  => null,
             'coupon'          => $quote->getCouponCode(),
 //            'order number'    => '',
-            'shipping'        => $quote->getShippingAddress()->getShippingAmount(),
+            'shipping'        => ($shippingAddress) ? $quote->getShippingAddress()->getShippingAmount() : null,
             'registered_user' => ! $quote->getCustomerIsGuest(),
         ];
 
         if ($quoteId !== null) {
             foreach ($items as $item) {
+                $this->log("ProductInCart: ", ['id' => $item->getProductId(), 'qty' => $item->getQty(), 'price' => $item->getPrice()]);
+
                 /** @var CartItemInterface $item */
-                list($productEventData, $usercomProductId) = $this->prepareProduct($item->getItemId(), $item->getQty(), $item->getPrice());
+                list($productEventData, $usercomProductId) = $this->prepareProduct(
+                    $item->getProductId(),
+                    $item->getQty(),
+                    $item->getPrice()
+                );
                 $cartEventData['products'][] = $productEventData;
                 $data                        = $this->getProductEventData($quoteId, $productEventData, $usercomKey, $quote->getUpdatedAt());
                 $eventResponse               = $this->helper->createProductEvent($usercomProductId, $data);
@@ -240,7 +254,7 @@ class ProductSyncAbstract
      */
     protected function getEventData(array $data, string $usercomKey = null, $time = null): array
     {
-        if ( ! empty($time)) {
+        if ( ! empty($time) && is_string($time) && ! is_numeric($time)) {
             $time = strtotime($time);
         }
 //            if ( ! empty($usercomUserId)) {

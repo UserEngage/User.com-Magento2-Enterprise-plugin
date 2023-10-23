@@ -31,6 +31,15 @@ class CustomerSyncAbstract
      */
     protected function event(string $message): void
     {
+        $this->logger->info(
+            "CustomerEvent: " . $this->eventType,
+            [
+                'usercom_user_id' => $usercomUserId ?? null,
+                'usercom_key'     => $usercomKey ?? null,
+                'moduleEnabled'   => $this->dataHelper->isModuleEnabled(),
+                'eventData'       => $eventData ?? []
+            ]
+        );
         if ( ! $this->dataHelper->isModuleEnabled()) {
             return;
         }
@@ -82,13 +91,16 @@ class CustomerSyncAbstract
      *
      * @return array
      */
-    protected function getEventData(string $usercomKey = null, $data): array
+    protected function getEventData(string $usercomKey = null, $data, $time = null): array
     {
+        if ( ! empty($time) && is_string($time) && ! is_numeric($time)) {
+            $time = strtotime($time);
+        }
         $userObject = $this->helper->getUserByUserKey($usercomKey);
 
         return [
             "name"      => $this->eventType,
-            "timestamp" => time(),
+            "timestamp" => $time ?? time(),
             "user_key"  => $usercomKey ?? null,
             "user_id"   => $userObject->id ?? null,
             "data"      => $data
