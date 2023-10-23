@@ -31,28 +31,28 @@ class CustomerSyncAbstract
      */
     protected function event(string $message): void
     {
-        $this->logger->info(
-            "CustomerEvent: " . $this->eventType,
-            [
-                'usercom_user_id' => $usercomUserId ?? null,
-                'usercom_key'     => $usercomKey ?? null,
-                'moduleEnabled'   => $this->dataHelper->isModuleEnabled(),
-                'eventData'       => $eventData ?? []
-            ]
-        );
-        if ( ! $this->dataHelper->isModuleEnabled()) {
+        if (! $this->dataHelper->isModuleEnabled()) {
             return;
         }
 
-        list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
-        $subscribeStatus = ($messageData['subscribeStatus'] == 1);
-
         $eventData = [];
-        if ( ! empty($messageData['email'])) {
-            $eventData['email'] = $messageData['email'];
-        }
-        $eventData['unsubscribed'] = ! $subscribeStatus;
+        list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
 
+        $subStatus = $messageData['subscribeStatus'] ?? null;
+        if ($subStatus !== null) {
+            $subscribeStatus = ($messageData['subscribeStatus'] == 1);
+        }
+        if ($subStatus !== null) {
+            $eventData['unsubscribed'] = ! $subscribeStatus;
+        }
+        $eventData['email'] = $messageData['email'] ?? null;
+
+        $customerId = $messageData['customerId'] ?? null;
+        if ($customerId !== null) {
+            $customer                = $this->customerRepository->getById($customerId);
+            $eventData['First name'] = $customer->getFirstname();
+            $eventData['Last name']  = $customer->getLastname();
+        }
         $this->logger->info(
             "CustomerEvent: " . $this->eventType,
             [
@@ -93,7 +93,7 @@ class CustomerSyncAbstract
      */
     protected function getEventData(string $usercomKey = null, $data, $time = null): array
     {
-        if ( ! empty($time) && is_string($time) && ! is_numeric($time)) {
+        if (! empty($time) && is_string($time) && ! is_numeric($time)) {
             $time = strtotime($time);
         }
         $userObject = $this->helper->getUserByUserKey($usercomKey);

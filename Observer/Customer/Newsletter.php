@@ -18,6 +18,7 @@ class Newsletter extends EventAbstract implements \Magento\Framework\Event\Obser
             'usercom_user_id' => $userComUserId ?? null,
             'user_key'        => $this->usercom->getFrontUserKey(),
             "email"           => $subscriber->getSubscriberEmail(),
+            "customerId"      => $customerId,
             "subscribeStatus" => $subscribeStatus,
             'time'            => time()
         ];

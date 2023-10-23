@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<type name="Magento\Sales\Model\Service\OrderService">
+		<plugin name="Usercom_Analytics_Plugin_Magento_Sales_Model_Service_OrderService" type="Usercom\Analytics\Plugin\Magento\Sales\Model\Service\OrderService" sortOrder="10" disabled="false"/>
+	</type>
+	<type name="Magento\Checkout\Model\ShippingInformationManagement">
+		<plugin name="Usercom_Analytics_Plugin_Magento_Checkout_Model_ShippingInformationManagement" type="Usercom\Analytics\Plugin\Magento\Checkout\Model\ShippingInformationManagement" sortOrder="10" disabled="false"/>
+	</type>
+</config>

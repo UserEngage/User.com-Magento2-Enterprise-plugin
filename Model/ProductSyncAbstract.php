@@ -16,6 +16,7 @@ class ProductSyncAbstract
     protected \Magento\Quote\Api\CartRepositoryInterface $quoteRepository;
     protected \Magento\Sales\Api\OrderRepositoryInterface $orderRepository;
 
+    protected string $productEventType;
     protected string $eventType;
 
     public function __construct(
@@ -53,7 +54,7 @@ class ProductSyncAbstract
         $productId = $messageData['productId'];
 
         $this->logger->info(
-            "CheckoutEvent: " . $this->eventType,
+            "CheckoutEvent: " . $this->productEventType,
             [
                 'productId:'      => $productId,
                 'usercom_user_id' => $usercomUserId ?? null,
@@ -68,7 +69,7 @@ class ProductSyncAbstract
 
             $data          = $this->getProductEventData($productId, $productEventData, $usercomKey, $messageData['time'] ?? null);
             $eventResponse = $this->helper->createProductEvent($usercomProductId, $data);
-            $this->logger->info("CheckoutEventResponse: " . $this->eventType, [json_encode($eventResponse)]);
+            $this->logger->info("CheckoutEventResponse: " . $this->productEventType, [json_encode($eventResponse)]);
         }
     }
 
@@ -170,7 +171,7 @@ class ProductSyncAbstract
         return [
             "id"         => $this->helper::PRODUCT_PREFIX . $productId,
             "data"       => $productEventData,
-            "event_type" => $this->eventType,
+            "event_type" => $this->productEventType,
             "timestamp"  => $time ?? time(),
             "user_key"   => $usercomKey ?? null,
             "user_id"    => $userObject->id ?? null,
@@ -191,7 +192,7 @@ class ProductSyncAbstract
         }
 
         list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
-        $quoteId = $messageData['quoteId'];
+        $quoteId = $messageData['quote_id'];
         /** @var Quote $quote */
         $quote  = $this->quoteRepository->get($quoteId);
         $items  = $quote->getItems();
@@ -199,12 +200,11 @@ class ProductSyncAbstract
         if (isset($totals['tax']) && ! empty($totals['tax'])) {
             $tax = $totals['tax']->getValue();
         }
-        $step            = 1;
         $shippingAddress = $quote->getShippingAddress();
 
-        $this->log("CartEvent: " . $this->eventType, json_encode($totals));
+        $this->log("CartEvent: " . $this->productEventType, json_encode($totals));
         $cartEventData = [
-            'step'            => $step,
+            'step'            => $messageData['step'] ?? 1,
             'products'        => [],
             'tax'             => $tax,
             'revenue'         => $quote->getGrandTotal(),
@@ -232,7 +232,7 @@ class ProductSyncAbstract
             }
             $eventData = $this->getEventData($cartEventData, $usercomKey, $quote->getUpdatedAt());
             $this->helper->createEvent($eventData);
-            $this->logger->info("CheckoutEventResponse: " . $this->eventType, [json_encode($eventResponse)]);
+            $this->logger->info("CheckoutEventResponse: " . $this->productEventType, [json_encode($eventResponse)]);
         }
     }
 
@@ -263,11 +263,11 @@ class ProductSyncAbstract
         $userObject = $this->helper->getUserByUserKey($usercomKey);
 
         return [
-            "data"       => $data,
-            "event_type" => $this->eventType,
-            "timestamp"  => $time ?? time(),
-            "user_key"   => $usercomKey ?? null,
-            "user_id"    => $userObject->id ?? null,
+            "data"      => $data,
+            "name"      => $this->eventType,
+            "timestamp" => $time ?? time(),
+            "user_key"  => $usercomKey ?? null,
+            "user_id"   => $userObject->id ?? null,
         ];
     }
 
@@ -285,37 +285,40 @@ class ProductSyncAbstract
         }
 
         list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
-        $orderId = $messageData['orderId'];
-        /** @var Order $quote */
-        $order         = $this->orderRepository->get($orderId);
-        $items         = $order->getItems();
-        $cartEventData = [
-            'products'        => [],
-            'tax'             => $order->getTaxAmount(),
-            'revenue'         => $order->getGrandTotal(),
-            'currency'        => $order->getGrandTotal(),
-            'payment_method'  => $order->getPayment()->getMethodInstance()->getTitle(),
-            'coupon'          => $order->getCouponCode(),
-            'order number'    => $order->getIncrementId(),
-            'shipping'        => $order->getShippingAddress()->getShippingAmount(),
-            'registered_user' => ! $order->getCustomerIsGuest(),
-        ];
-
+        $orderId = $messageData['order_id'] ?? null;
+        $this->logger->info("OrderStart: " . $this->productEventType, [json_encode($messageData)]);
         if ($orderId !== null) {
+            /** @var Order $quote */
+            $order         = $this->orderRepository->get($orderId);
+            $items         = $order->getItems();
+            $cartEventData = [
+                'products'        => [],
+                'tax'             => $order->getTaxAmount(),
+                'revenue'         => $order->getGrandTotal(),
+                'currency'        => $order->getGrandTotal(),
+                'payment_method'  => $order->getPayment()->getMethodInstance()->getTitle(),
+                'coupon'          => $order->getCouponCode(),
+                'order number'    => $order->getIncrementId(),
+                'shipping'        => $order->getShippingAddress()->getShippingAmount(),
+                'registered_user' => ! $order->getCustomerIsGuest(),
+            ];
+            $this->logger->info("OrderEvent: " . $this->productEventType, [json_encode($cartEventData)]);
             foreach ($items as $item) {
                 /** @var OrderItemInterface $item */
                 list($productEventData, $usercomProductId) = $this->prepareProduct(
-                    $item->getItemId(),
+                    $item->getProductId(),
                     $item->getQtyOrdered(),
                     $item->getPriceInclTax()
                 );
                 $cartEventData['products'][] = $productEventData;
-                $data                        = $this->getProductEventData($orderId, $productEventData, $usercomKey, $order->getCreatedAt());
+                $data                        = $this->getProductEventData($item->getProductId(), $productEventData, $usercomKey, $order->getCreatedAt());
                 $eventResponse               = $this->helper->createProductEvent($usercomProductId, $data);
             }
+            $this->logger->info("OrderEventStd: " . $this->eventType, [json_encode($cartEventData)]);
+
             $eventData = $this->getEventData($cartEventData, $usercomKey, $order->getCreatedAt());
             $this->helper->createEvent($eventData);
-            $this->logger->info("CheckoutEventResponse: " . $this->eventType, [json_encode($eventResponse)]);
+            $this->logger->info("CheckoutEventResponse: " . $this->productEventType, [json_encode($eventResponse)]);
         }
     }
 }

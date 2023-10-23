@@ -14,7 +14,7 @@ class CartSync extends ProductSyncAbstract
      */
     public function add(string $message): void
     {
-        $this->eventType = $this->helper::PRODUCT_EVENT_ADD_TO_CART;
+        $this->productEventType = $this->helper::PRODUCT_EVENT_ADD_TO_CART;
         $this->singleProductEvent($message);
     }
 
@@ -27,8 +27,9 @@ class CartSync extends ProductSyncAbstract
      */
     public function purchase(string $message): void
     {
-        $this->eventType = $this->helper::PRODUCT_EVENT_PURCHASE;
-        $this->singleProductEvent($message);
+        $this->productEventType = $this->helper::PRODUCT_EVENT_PURCHASE;
+        $this->eventType        = $this->helper::EVENT_PURCHASE;
+        $this->orderEvent($message);
     }
 
     /**
@@ -40,7 +41,9 @@ class CartSync extends ProductSyncAbstract
      */
     public function checkout(string $message): void
     {
-        $this->eventType = $this->helper::PRODUCT_EVENT_CHECKOUT;
+        $this->productEventType = $this->helper::PRODUCT_EVENT_CHECKOUT;
+        $this->eventType        = $this->helper::EVENT_CHECKOUT;
+
         $this->cartEvent($message);
     }
 
@@ -53,7 +56,7 @@ class CartSync extends ProductSyncAbstract
      */
     public function remove(string $message): void
     {
-        $this->eventType = $this->helper::PRODUCT_EVENT_REMOVE;
+        $this->productEventType = $this->helper::PRODUCT_EVENT_REMOVE;
         $this->singleProductEvent($message);
     }
 

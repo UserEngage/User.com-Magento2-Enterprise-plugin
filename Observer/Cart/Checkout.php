@@ -38,10 +38,11 @@ class Checkout implements \Magento\Framework\Event\ObserverInterface
             $userComUserId = $this->customerSession->getCustomer()->getAttribute('usercom_user_id');
         }
         $data = [
-            'quoteId'         => $quote->getId(),
+            'quote_id'         => $quote->getId(),
             'usercom_user_id' => $userComUserId,
             'user_key'        => $this->helper->getFrontUserKey(),
-            'time'            => time()
+            'time'            => time(),
+            'step'            => '1'
         ];
         $this->publisher->publish('usercom.cart.checkout', json_encode($data));
     }

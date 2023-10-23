@@ -16,11 +16,11 @@
     <event name="controller_action_postdispatch_checkout">
         <observer instance="Usercom\Analytics\Observer\Cart\Checkout" name="usercom_controller_action_postdispatch_checkout"/>
     </event>
+    <event name="sales_quote_save_after">
+        <observer instance="Usercom\Analytics\Observer\Cart\Checkout" name="usercom_sales_quote_save_after"/>
+    </event>
     <event name="sales_quote_remove_item">
         <observer instance="Usercom\Analytics\Observer\Cart\Remove" name="usercom_sales_quote_remove_item"/>
-    </event>
-    <event name="sales_order_place_after">
-        <observer instance="Usercom\Analytics\Observer\Cart\PlaceOrder" name="usercom_sales_order_place_after"/>
     </event>
     <event name="newsletter_subscriber_save_after">
         <observer instance="Usercom\Analytics\Observer\Customer\Newsletter" name="usercom_newsletter_subscriber_save_after"/>

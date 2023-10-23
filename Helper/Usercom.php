@@ -25,6 +25,9 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     const PRODUCT_EVENT_REFUND = 'refund';
     const PRODUCT_EVENT_PROMO_CLICK = 'promo click';
 
+    const EVENT_PURCHASE = 'purchase_details';
+    const EVENT_CHECKOUT = 'order_details';
+
     const EVENT_LOGIN = 'login';
     const EVENT_REGISTER = 'register';
     const EVENT_NEWSLETTER_SIGN_UP = 'newsletter_signup';
@@ -299,10 +302,11 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function createEvent($data)
     {
-//        if ($this->helper->sendStoreSource()) {
-//            $host                         = $_SERVER["HTTP_HOST"];
-//            $data["data"]["store_source"] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$host/";
-//        }
+        if ($this->helper->sendStoreSource()) {
+            $this->logger->info("SERVER:", ['server' => $_SERVER]);
+            $host                         = $_SERVER["BASE_SECURE_URL"] ?? $_SERVER["BASE_URL"];
+            $data["data"]["store_source"] = $host . "/";
+        }
         $this->logger->info("Event Data:", ['data' => $data]);
 
         return $this->sendCurl("events/", 'POST', $data);
@@ -311,7 +315,8 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     public function createEventByCustomId($userCustomId, $data)
     {
         if ($this->helper->sendStoreSource()) {
-            $data["data"]["store_source"] = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/";
+            $host                         = $_SERVER["BASE_SECURE_URL"] ?? $_SERVER["BASE_URL"];
+            $data["data"]["store_source"] = $host . "/";
         }
 
         return $this->sendCurl("/users-by-id/$userCustomId/events/", 'POST', $data);
