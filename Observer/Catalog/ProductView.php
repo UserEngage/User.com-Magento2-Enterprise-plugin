@@ -18,9 +18,8 @@ class ProductView implements \Magento\Framework\Event\ObserverInterface
         $this->helper          = $helper;
     }
 
-    public function execute(
-        \Magento\Framework\Event\Observer $observer
-    ) {
+    public function execute(\Magento\Framework\Event\Observer $observer)
+    {
         $userComUserId = null;
         if ($this->customerSession->isLoggedIn()) {
             $userComUserId = $this->customerSession->getCustomer()->getAttribute('usercom_user_id');
