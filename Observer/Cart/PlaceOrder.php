@@ -11,7 +11,7 @@ class PlaceOrder implements \Magento\Framework\Event\ObserverInterface
     public function __construct(
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
         \Usercom\Analytics\Helper\Usercom $helper,
-        \Magento\Customer\Model\Session $customerSession,
+        \Magento\Customer\Model\Session $customerSession
     ) {
         $this->helper          = $helper;
         $this->publisher       = $publisher;

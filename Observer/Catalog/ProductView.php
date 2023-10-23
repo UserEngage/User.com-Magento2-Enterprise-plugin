@@ -4,7 +4,6 @@ namespace Usercom\Analytics\Observer\Catalog;
 
 class ProductView implements \Magento\Framework\Event\ObserverInterface
 {
-
     protected $customerSession;
     private \Magento\Framework\MessageQueue\PublisherInterface $publisher;
     private \Usercom\Analytics\Helper\Usercom $helper;
