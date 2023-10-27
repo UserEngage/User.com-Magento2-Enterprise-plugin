@@ -25,4 +25,7 @@
     <topic name="usercom.customer.register" request="string">
         <handler name="usercomCustomerRegister" type="Usercom\Analytics\Model\CustomerSync" method="register"/>
     </topic>
+    <topic name="usercom.customer.newsletter" request="string">
+        <handler name="usercomCustomerNewsletter" type="Usercom\Analytics\Model\CustomerSync" method="newsletter"/>
+    </topic>
 </config>
