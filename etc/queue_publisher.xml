@@ -4,6 +4,7 @@
     <publisher topic="usercom.customer.sync"/>
     <publisher topic="usercom.customer.login"/>
     <publisher topic="usercom.customer.register"/>
+    <publisher topic="usercom.customer.newsletter"/>
     <publisher topic="usercom.catalog.product.event"/>
     <publisher topic="usercom.cart.product.add"/>
     <publisher topic="usercom.cart.product.remove"/>
