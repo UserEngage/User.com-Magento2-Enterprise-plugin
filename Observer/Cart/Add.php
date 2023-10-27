@@ -9,19 +9,22 @@ class Add implements \Magento\Framework\Event\ObserverInterface
     private \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurableProduct;
     private \Magento\Framework\MessageQueue\PublisherInterface $publisher;
     private \Magento\Customer\Model\Session $customerSession;
+    private \Psr\Log\LoggerInterface $logger;
 
     public function __construct(
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
         \Usercom\Analytics\Helper\Usercom $helper,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurableProduct,
-        \Magento\Customer\Model\Session $customerSession
+        \Magento\Customer\Model\Session $customerSession,
+        \Psr\Log\LoggerInterface $logger
     ) {
         $this->helper              = $helper;
         $this->request             = $request;
         $this->configurableProduct = $configurableProduct;
         $this->publisher           = $publisher;
         $this->customerSession     = $customerSession;
+        $this->logger              = $logger;
     }
 
     public function execute(
@@ -45,6 +48,10 @@ class Add implements \Magento\Framework\Event\ObserverInterface
             'user_key'        => $this->helper->getFrontUserKey(),
             'time'            => time()
         ];
-        $this->publisher->publish('usercom.cart.product.add', json_encode($data));
+        try {
+            $this->publisher->publish('usercom.cart.product.add', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
     }
 }

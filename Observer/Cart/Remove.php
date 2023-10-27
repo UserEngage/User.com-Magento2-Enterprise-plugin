@@ -10,19 +10,22 @@ class Remove implements \Magento\Framework\Event\ObserverInterface
     protected \Magento\Framework\MessageQueue\PublisherInterface $publisher;
     protected \Magento\Customer\Model\Session $customerSession;
     protected \Usercom\Analytics\Helper\Usercom $helper;
+    protected \Psr\Log\LoggerInterface $logger;
 
     public function __construct(
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
         \Usercom\Analytics\Helper\Usercom $helper,
         \Magento\Framework\App\RequestInterface $request,
         \Magento\ConfigurableProduct\Model\Product\Type\Configurable $configurableProduct,
-        \Magento\Customer\Model\Session $customerSession
+        \Magento\Customer\Model\Session $customerSession,
+        \Psr\Log\LoggerInterface $logger
     ) {
         $this->customerSession     = $customerSession;
         $this->helper              = $helper;
         $this->request             = $request;
         $this->configurableProduct = $configurableProduct;
         $this->publisher           = $publisher;
+        $this->logger              = $logger;
     }
 
     public function execute(
@@ -44,6 +47,11 @@ class Remove implements \Magento\Framework\Event\ObserverInterface
             'user_key'        => $this->helper->getFrontUserKey(),
             'time'            => time()
         ];
-        $this->publisher->publish('usercom.cart.product.remove', json_encode($data));
+
+        try {
+            $this->publisher->publish('usercom.cart.product.remove', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
     }
 }

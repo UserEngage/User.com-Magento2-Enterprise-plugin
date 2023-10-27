@@ -12,19 +12,22 @@ abstract class EventAbstract
     protected $publisher;
     protected CustomerRegistry $customerRegistry;
     protected CustomerRepository $customerRepository;
+    protected \Psr\Log\LoggerInterface $logger;
 
     public function __construct(
         CustomerRegistry $customerRegistry,
         CustomerRepository $customerRepository,
         \Usercom\Analytics\Helper\Data $helper,
         \Usercom\Analytics\Helper\Usercom $usercom,
-        \Magento\Framework\MessageQueue\PublisherInterface $publisher
+        \Magento\Framework\MessageQueue\PublisherInterface $publisher,
+        \Psr\Log\LoggerInterface $logger
     ) {
         $this->customerRegistry   = $customerRegistry;
         $this->customerRepository = $customerRepository;
         $this->helper             = $helper;
         $this->usercom            = $usercom;
         $this->publisher          = $publisher;
+        $this->logger             = $logger;
     }
 
     protected function generateUserComUserID($observer)

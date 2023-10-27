@@ -17,7 +17,11 @@ class Login extends EventAbstract implements \Magento\Framework\Event\ObserverIn
             'email'           => $observer->getEvent()->getCustomer()->getEmail(),
             'customerId'      => $observer->getEvent()->getCustomer()->getId()
         ];
-        $this->publisher->publish('usercom.customer.login', json_encode($data));
+        try {
+            $this->publisher->publish('usercom.customer.login', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
 
 
 //        $customer = $observer->getEvent()->getData('customer');

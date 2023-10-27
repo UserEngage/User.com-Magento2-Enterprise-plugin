@@ -40,14 +40,18 @@ class ShippingInformationManagement
             $userComUserId = $this->customerSession->getCustomer()->getAttribute('usercom_user_id');
         }
         $data = [
-            'quote_id'            => $cartId,
+            'quote_id'           => $cartId,
             'usercom_user_id'    => $userComUserId,
             'user_key'           => $this->helper->getFrontUserKey(),
             'time'               => time(),
             'step'               => '2',
             'addressInformation' => $addressInformation
         ];
-        $this->publisher->publish('usercom.cart.checkout', json_encode($data));
+        try {
+            $this->publisher->publish('usercom.cart.checkout', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
 
         //Your plugin code
         return $result;

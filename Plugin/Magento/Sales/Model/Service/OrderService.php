@@ -43,7 +43,11 @@ class OrderService
             'time'            => time(),
             'step'            => '2'
         ];
-        $this->publisher->publish('usercom.order.purchase', json_encode($data));
+        try {
+            $this->publisher->publish('usercom.order.purchase', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
 
         //Your plugin code
         return $result;

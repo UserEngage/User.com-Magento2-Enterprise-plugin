@@ -18,8 +18,11 @@ class Register extends EventAbstract implements \Magento\Framework\Event\Observe
             'email'           => $observer->getEvent()->getCustomer()->getEmail(),
             'customerId'      => $observer->getEvent()->getCustomer()->getId()
         ];
-        $this->publisher->publish('usercom.customer.register', json_encode($data));
-
+        try {
+            $this->publisher->publish('usercom.customer.register', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
 //        if( !$this->helper->isModuleEnabled() || !($usercomCustomerId = $this->usercom->getUsercomCustomerId($customerId)) )
 //            return;
 

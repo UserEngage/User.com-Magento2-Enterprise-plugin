@@ -7,15 +7,18 @@ class ProductView implements \Magento\Framework\Event\ObserverInterface
     protected $customerSession;
     private \Magento\Framework\MessageQueue\PublisherInterface $publisher;
     private \Usercom\Analytics\Helper\Usercom $helper;
+    private \Psr\Log\LoggerInterface $logger;
 
     public function __construct(
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
-        \Usercom\Analytics\Helper\Usercom $helper
+        \Usercom\Analytics\Helper\Usercom $helper,
+        \Psr\Log\LoggerInterface $logger
     ) {
         $this->customerSession = $customerSession;
         $this->publisher       = $publisher;
         $this->helper          = $helper;
+        $this->logger          = $logger;
     }
 
     public function execute(\Magento\Framework\Event\Observer $observer)
@@ -31,6 +34,10 @@ class ProductView implements \Magento\Framework\Event\ObserverInterface
             'user_key'        => $this->helper->getFrontUserKey(),
             'time'            => time()
         ];
-        $this->publisher->publish('usercom.catalog.product.event', json_encode($data));
+        try {
+            $this->publisher->publish('usercom.catalog.product.event', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
     }
 }

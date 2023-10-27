@@ -22,7 +22,11 @@ class Newsletter extends EventAbstract implements \Magento\Framework\Event\Obser
             "subscribeStatus" => $subscribeStatus,
             'time'            => time()
         ];
-        $this->publisher->publish('usercom.customer.newsletter', json_encode($data));
+        try {
+            $this->publisher->publish('usercom.customer.newsletter', json_encode($data));
+        } catch (\Exception $e) {
+            $this->logger->warning($e->getMessage());
+        }
     }
 
     /**
