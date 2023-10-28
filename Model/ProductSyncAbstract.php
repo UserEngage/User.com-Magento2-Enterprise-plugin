@@ -17,6 +17,7 @@ class ProductSyncAbstract
     protected \Magento\Catalog\Api\ProductRepositoryInterface $productRepository;
     protected \Magento\Quote\Api\CartRepositoryInterface $quoteRepository;
     protected \Magento\Sales\Api\OrderRepositoryInterface $orderRepository;
+    protected \Magento\Catalog\Helper\Product $productHelper;
 
     protected string $productEventType;
     protected string $eventType;
@@ -28,6 +29,7 @@ class ProductSyncAbstract
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Usercom\Analytics\Helper\Usercom $helper,
         \Usercom\Analytics\Helper\Data $dataHelper,
+        \Magento\Catalog\Helper\Product $productHelper,
         \Psr\Log\LoggerInterface $logger
     ) {
         $this->customerRepository = $customerRepository;
@@ -36,6 +38,7 @@ class ProductSyncAbstract
         $this->orderRepository    = $orderRepository;
         $this->helper             = $helper;
         $this->dataHelper         = $dataHelper;
+        $this->productHelper      = $productHelper;
         $this->logger             = $logger;
     }
 
@@ -130,10 +133,9 @@ class ProductSyncAbstract
 
     protected function mapProductData(\Magento\Catalog\Api\Data\ProductInterface $product, $qty = 1, $price = null): array
     {
-        $media        = $product->getMediaGalleryEntries();
         $brand        = '';
         $categoryName = '';
-        $fileUrl      = ( ! empty($media[0])) ? $media[0]->getFile() : null;
+        $fileUrl      = $this->productHelper->getImageUrl($product);
         $data         = [
             "id"            => $this->helper::PRODUCT_PREFIX . $product->getId(),
             "custom_id"     => $this->helper::PRODUCT_PREFIX . $product->getId(),
@@ -231,7 +233,7 @@ class ProductSyncAbstract
                 $cartEventData['products'][] = $productEventData;
                 $data                        = $this->getProductEventData($quoteId, $productEventData, $usercomKey, $quote->getUpdatedAt());
                 $this->debug("ProductInCartBefore: ", $data);
-                $eventResponse               = $this->helper->createProductEvent($usercomProductId, $data);
+                $eventResponse = $this->helper->createProductEvent($usercomProductId, $data);
             }
             $eventData = $this->getEventData($cartEventData, $usercomKey, $quote->getUpdatedAt());
             $this->helper->createEvent($eventData);
