@@ -6,4 +6,7 @@
 	<type name="Magento\Checkout\Model\ShippingInformationManagement">
 		<plugin name="Usercom_Analytics_Plugin_Magento_Checkout_Model_ShippingInformationManagement" type="Usercom\Analytics\Plugin\Magento\Checkout\Model\ShippingInformationManagement" sortOrder="10" disabled="false"/>
 	</type>
+	<type name="Magento\Catalog\Helper\Product">
+		<plugin name="Usercom_Analytics_Plugin_Magento_Catalog_Helper_Product" type="Usercom\Analytics\Plugin\Magento\Catalog\Helper\Product" sortOrder="10" disabled="false"/>
+	</type>
 </config>

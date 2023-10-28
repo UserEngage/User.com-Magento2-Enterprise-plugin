@@ -1,35 +1,48 @@
 <?php
 
-namespace Usercom\Analytics\Observer\Catalog;
+/**
+ * Copyright ©  All rights reserved.
+ * See COPYING.txt for license details.
+ */
+declare(strict_types=1);
 
-class ProductView implements \Magento\Framework\Event\ObserverInterface
+namespace Usercom\Analytics\Plugin\Magento\Catalog\Helper;
+
+class Product
 {
-    protected $customerSession;
-    private \Magento\Framework\MessageQueue\PublisherInterface $publisher;
+
     private \Usercom\Analytics\Helper\Usercom $helper;
+    private \Magento\Framework\MessageQueue\PublisherInterface $publisher;
+    private \Magento\Customer\Model\Session $customerSession;
     private \Psr\Log\LoggerInterface $logger;
 
     public function __construct(
-        \Magento\Customer\Model\Session $customerSession,
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
         \Usercom\Analytics\Helper\Usercom $helper,
+        \Magento\Customer\Model\Session $customerSession,
         \Psr\Log\LoggerInterface $logger
     ) {
-        $this->customerSession = $customerSession;
-        $this->publisher       = $publisher;
         $this->helper          = $helper;
+        $this->publisher       = $publisher;
+        $this->customerSession = $customerSession;
         $this->logger          = $logger;
     }
 
-    public function execute(\Magento\Framework\Event\Observer $observer)
-    {
+    public function afterInitProduct(
+        \Magento\Catalog\Helper\Product $subject,
+        $result,
+        $productId,
+        $controller,
+        $params = null
+    ) {
+
         $userComUserId = null;
         if ($this->customerSession->isLoggedIn()) {
             $userComUserId = $this->customerSession->getCustomer()->getAttribute('usercom_user_id');
         }
 
         $data = [
-            'productId'       => $observer->getEvent()->getRequest()->getParam('id'),
+            'productId'       => $productId,
             'usercom_user_id' => $userComUserId,
             'user_key'        => $this->helper->getFrontUserKey(),
             'time'            => time()
@@ -39,5 +52,8 @@ class ProductView implements \Magento\Framework\Event\ObserverInterface
         } catch (\Exception $e) {
             $this->logger->warning($e->getMessage());
         }
+
+        //Your plugin code
+        return $result;
     }
 }

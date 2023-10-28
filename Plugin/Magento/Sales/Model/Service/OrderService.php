@@ -32,6 +32,8 @@ class OrderService
         $result,
         $order
     ) {
+
+        $this->logger->debug('OrderService afterPlace');
         $userComUserId = null;
         if ($this->customerSession->isLoggedIn()) {
             $userComUserId = $this->customerSession->getCustomer()->getAttribute('usercom_user_id');

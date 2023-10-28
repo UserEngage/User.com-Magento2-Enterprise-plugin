@@ -4,6 +4,8 @@ namespace Usercom\Analytics\Model;
 
 class CustomerSyncAbstract
 {
+    use DebugTrait;
+
     protected \Usercom\Analytics\Helper\Usercom $helper;
     protected \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository;
     protected \Usercom\Analytics\Helper\Data $dataHelper;
@@ -31,7 +33,7 @@ class CustomerSyncAbstract
      */
     protected function event(string $message): void
     {
-        if (! $this->dataHelper->isModuleEnabled()) {
+        if ( ! $this->dataHelper->isModuleEnabled()) {
             return;
         }
 
@@ -48,12 +50,14 @@ class CustomerSyncAbstract
         $eventData['email'] = $messageData['email'] ?? null;
 
         $customerId = $messageData['customerId'] ?? null;
+        $this->log('CustomerEvent' . $this->eventType, ['customerId' => $customerId]);
+
         if ($customerId !== null) {
             $customer                = $this->customerRepository->getById($customerId);
             $eventData['First name'] = $customer->getFirstname();
             $eventData['Last name']  = $customer->getLastname();
         }
-        $this->logger->info(
+        $this->debug(
             "CustomerEvent: " . $this->eventType,
             [
                 'usercom_user_id' => $usercomUserId ?? null,
@@ -68,7 +72,7 @@ class CustomerSyncAbstract
         $data          = $this->getEventData($usercomKey, $eventData);
         $eventResponse = $this->helper->createEvent($data);
 //        $eventResponse = $this->helper->createEventByCustomId($usercomUserId,$data);
-        $this->logger->info("CustomerEvent: " . $this->eventType, [json_encode($eventResponse)]);
+        $this->debug("CustomerEvent: " . $this->eventType, [json_encode($eventResponse)]);
     }
 
     /**
@@ -93,7 +97,7 @@ class CustomerSyncAbstract
      */
     protected function getEventData(string $usercomKey = null, $data, $time = null): array
     {
-        if (! empty($time) && is_string($time) && ! is_numeric($time)) {
+        if ( ! empty($time) && is_string($time) && ! is_numeric($time)) {
             $time = strtotime($time);
         }
         $userObject = $this->helper->getUserByUserKey($usercomKey);
@@ -105,15 +109,5 @@ class CustomerSyncAbstract
             "user_id"   => $userObject->id ?? null,
             "data"      => $data
         ];
-    }
-
-    /**
-     * @param string $message
-     *
-     * @return void
-     */
-    protected function log(string $message)
-    {
-        $this->logger->info("CustomerSyncLog:", [$message]);
     }
 }

@@ -6,7 +6,6 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 {
     const COOKIE_USERKEY = "__ca__chat";
 //    const COOKIE_USER_ID = "userComUserId";
-    const DEBUG_USERCOM = true;
     const PRODUCT_PREFIX = "m2ee_";
     const PRODUCT_EVENT_ADD_TO_CART = "add to cart";
     const PRODUCT_EVENT_PURCHASE = 'purchase';
@@ -31,7 +30,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     const EVENT_LOGIN = 'login';
     const EVENT_REGISTER = 'register';
     const EVENT_NEWSLETTER_SIGN_UP = 'newsletter_signup';
-
+    public $debug = false;
     protected $helper;
     protected $cookieManager;
     protected $storeManager;
@@ -65,6 +64,9 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $this->product                  = $product;
         $this->resourceConnection       = $resourceConnection;
         $this->logger                   = $logger;
+        if (defined('USER_COM_DEBUG')) {
+            $this->debug = USER_COM_DEBUG;
+        }
         parent::__construct($context);
     }
 
@@ -131,7 +133,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $err      = curl_error($curl);
         $me       = microtime(true);
 
-        $this->logRequest('sendCurl' . $method, $url, $data, $me - $ms, $response);
+        $this->debug('sendCurl' . $method, $data, $response, $url, $me - $ms,);
         if ( ! empty($err)) {
             $this->logError('sendCurl' . $method, $url, $err, $response);
         }
@@ -145,40 +147,31 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @return void
      */
-    private function logRequest($name, $url, $data, $mt, $response): void
+    private function debug($name, $data, $response = [], $url = "", $mt = null): void
     {
-        if (self::DEBUG_USERCOM) {
-            $this->logger->info(
-                "Usercom",
-                [$name . ': ' . $mt . "\n" . $url . "\nREQUEST:   " . json_encode($data) . "\nRESPONSE:   " . $response . "\n\n\n\n\n"]
+        if ($this->debug) {
+            $this->logger->debug(
+                "UsercomPluginDebug: " . $name,
+                ['time' => $mt, 'url' => $url, 'REQUEST' => json_encode($data), "RESPONSE" => $response]
             );
         }
     }
 
     private function logError(string $name, $url, string $err, $response)
     {
-        if (self::DEBUG_USERCOM) {
-            $this->logger->error(
-                "Usercom Error",
-                [$name . 'Error: ' . "\n" . $url . "\n" . json_encode($err) . "\n" . json_encode($response) . "\n"]
-            );
-        }
+        $this->logger->error(
+            "UsercomPluginError: " . $name,
+            ['url' => $url, 'error' => json_encode($err), 'response' => json_encode($response)]
+        );
     }
 
     public function mapDataForUsercom($data): array
     {
-        $fieldsMap               = $this->helper->getFieldMapping();
-        $mappedData              = [];
-        $mappedData['email']     = $data['email'];
-        $mappedData['user_id']   = $data['usercom_user_id'];
-        $mappedData['custom_id'] = $data['usercom_user_id'];
-//        $mappedData['paywall']                = $user->hasSubscription();
-//        $mappedData['paywall_type']           = $sub->type ?? null;
-//        $mappedData['paywall_period']         = $sub->period ?? null;
-//        $mappedData['paywall_active']         = $daysLeft > 0 ?? false;
-//        $mappedData['paywall_active_payment'] = $sub->is_active ?? false;
-//        $mappedData['paywall_days_left']      = $daysLeft;
-//        $mappedData['account_ltv']            = $data['total'];
+        $fieldsMap                        = $this->helper->getFieldMapping();
+        $mappedData                       = [];
+        $mappedData['email']              = $data['email'];
+        $mappedData['user_id']            = $data['usercom_user_id'];
+        $mappedData['custom_id']          = $data['usercom_user_id'];
         $mappedData['account_created_at'] = $data['created_at'];
         $mappedData['account_is_active']  = ! empty($data['confirmation']);
         $mappedData['First name']         = $data['firstname'];
@@ -277,10 +270,9 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         if ( ! $productId) {
             return false;
         }
-        $this->logger->info("Product Custom ID:", ['custom_id' => $productId]);
-
+        $this->debug("Product Custom ID:", ['custom_id' => $productId]);
         $usercomProduct = $this->getProductByCustomId($productId);
-        $this->logger->info("Usercom Product ID:", ['usercomProductId' => $usercomProduct->id ?? null]);
+        $this->debug("Usercom Product ID:", ['usercomProductId' => $usercomProduct->id ?? null]);
 
         return $usercomProduct->id ?? null;
     }
@@ -297,17 +289,40 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function createProductEvent($id, $data)
     {
+        $this->log("Create ProductEvent " . $data['event_type'] . ':', ['id' => $data['id']]);
+
         return $this->sendCurl("products/$id/product_event/", 'POST', $data);
+    }
+
+    /**
+     * @param $data
+     *
+     * @return void
+     */
+    private function log($name, $data, $response = [], $url = "", $mt = null): void
+    {
+        $dataToSend = [];
+
+        if ( ! empty($url)) {
+            $dataToSend['url'] = $url;
+        }
+        if ( ! empty($mt)) {
+            $dataToSend['mt'] = $mt;
+        }
+        if (isset($data['id'])) {
+            $dataToSend['id'] = $data['id'];
+        }
+        $this->logger->info("UserComPlugin: " . $name, $dataToSend);
     }
 
     public function createEvent($data)
     {
         if ($this->helper->sendStoreSource()) {
-            $this->logger->info("SERVER:", ['server' => $_SERVER]);
+            $this->debug("SERVER:", ['server' => $_SERVER]);
             $host                         = $_SERVER["BASE_SECURE_URL"] ?? $_SERVER["BASE_URL"];
             $data["data"]["store_source"] = $host . "/";
         }
-        $this->logger->info("Event Data:", ['data' => $data]);
+        $this->log("Create Event " . ($data['name'] ?? '') . ':', $data);
 
         return $this->sendCurl("events/", 'POST', $data);
     }
