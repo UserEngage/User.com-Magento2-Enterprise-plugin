@@ -32,7 +32,6 @@ class OrderService
         $result,
         $order
     ) {
-
         $this->logger->debug('OrderService afterPlace');
         $userComUserId = null;
         if ($this->customerSession->isLoggedIn()) {
@@ -42,7 +41,7 @@ class OrderService
             'order_id'        => $order->getId(),
             'usercom_user_id' => $userComUserId,
             'user_key'        => $this->helper->getFrontUserKey(),
-            'time'            => time(),
+            'time'            => $order->getCreatedAt(),
             'step'            => '2'
         ];
         try {

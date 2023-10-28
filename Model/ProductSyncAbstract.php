@@ -85,8 +85,8 @@ class ProductSyncAbstract
     {
         $messageData = json_decode($message, true);
 
-        $usercomUserId = $messageData['usercom_user_id'];
-        $usercomKey    = $messageData['user_key'];
+        $usercomUserId = $messageData['usercom_user_id'] ?? null;
+        $usercomKey    = $messageData['user_key'] ?? null;
 
         return [$usercomUserId, $usercomKey, $messageData];
     }
@@ -284,8 +284,18 @@ class ProductSyncAbstract
 
         if ($orderId !== null) {
             /** @var Order $quote */
-            $order         = $this->orderRepository->get($orderId);
-            $items         = $order->getItems();
+            $order = $this->orderRepository->get($orderId);
+            $items = $order->getItems();
+
+            if ($usercomKey === null) {
+                $customerId    = $order->getCustomerId();
+                $customer      = $this->customerRepository->getById($customerId);
+                $data          = $customer->__toArray();
+                $usercomUserId = $data['custom_attributes']['usercom_user_id']['value'] ?? null;
+                $usercomKey    = $data['custom_attributes']['usercom_key']['value'] ?? null;
+                $this->debug("CustomerSync customAttrId:", $data);
+            }
+
             $cartEventData = [
                 'products'        => [],
                 'tax'             => $order->getTaxAmount(),

@@ -62,7 +62,15 @@
                 <field id="customersSyncButton" translate="label comment" type="button" sortOrder="20" showInDefault="1"
                        showInWebsite="1" showInStore="0">
                     <frontend_model>Usercom\Analytics\Block\System\Config\CustomersSyncButton</frontend_model>
-                    <comment>Directly synchronize all of your customers data to User.com app</comment>
+                    <comment>Directly synchronize all of your customers data to User.com app from selected Time</comment>
+                    <tooltip>It creates users visible in your User.com app inside People section. Users have to be
+                        created before order/purchase product events synchronization.
+                    </tooltip>
+                </field>
+                <field id="productsPurchaseSyncButton" translate="label comment" type="button" sortOrder="20" showInDefault="1"
+                       showInWebsite="1" showInStore="0">
+                    <frontend_model>Usercom\Analytics\Block\System\Config\ProductsPurchaseSyncButton</frontend_model>
+                    <comment>Directly synchronize all of orders data to User.com app from selected Time</comment>
                     <tooltip>It creates users visible in your User.com app inside People section. Users have to be
                         created before order/purchase product events synchronization.
                     </tooltip>
