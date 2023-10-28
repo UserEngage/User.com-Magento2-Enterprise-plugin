@@ -9,19 +9,28 @@ class CustomerSyncAbstract
     protected \Usercom\Analytics\Helper\Usercom $helper;
     protected \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository;
     protected \Usercom\Analytics\Helper\Data $dataHelper;
+    protected \Magento\Sales\Api\OrderRepositoryInterface $orderRepository;
+    protected \Magento\Framework\Api\SearchCriteria $searchCriteria;
+    protected \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder;
 
     protected string $eventType;
 
     public function __construct(
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
+        \Magento\Framework\Api\SearchCriteria $searchCriteria,
         \Usercom\Analytics\Helper\Usercom $helper,
         \Usercom\Analytics\Helper\Data $dataHelper,
         \Psr\Log\LoggerInterface $logger
     ) {
-        $this->customerRepository = $customerRepository;
-        $this->helper             = $helper;
-        $this->dataHelper         = $dataHelper;
-        $this->logger             = $logger;
+        $this->customerRepository    = $customerRepository;
+        $this->orderRepository       = $orderRepository;
+        $this->helper                = $helper;
+        $this->dataHelper            = $dataHelper;
+        $this->logger                = $logger;
+        $this->searchCriteria        = $searchCriteria;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
     }
 
     /**

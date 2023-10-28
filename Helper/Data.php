@@ -61,7 +61,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getFieldMapping()
     {
-        return json_decode($this->getConfigValue(self::XML_FIELD_MAPPING), true);
+        return json_decode($this->getConfigValue(self::XML_FIELD_MAPPING) ?? '[]', true);
     }
 
     public function sendStoreSource()

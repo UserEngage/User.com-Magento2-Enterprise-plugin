@@ -4,6 +4,7 @@ namespace Usercom\Analytics\Model;
 
 class CustomerSync extends CustomerSyncAbstract
 {
+    private array $orders = [];
 
     /**
      * @param string $message
@@ -47,7 +48,7 @@ class CustomerSync extends CustomerSyncAbstract
      */
     public function syncCustomerById(string $customerId): void
     {
-        $this->logger->info("CustomerSync", ['customerId:' => $customerId]);
+        $this->debug("CustomerSync", ['customerId:' => $customerId]);
         $customerId = $customerId ?? null;
         if ($customerId !== null) {
             $customer = $this->customerRepository->getById($customerId);
@@ -58,7 +59,7 @@ class CustomerSync extends CustomerSyncAbstract
             $data['usercom_user_id'] = $customerUsercomUserId;
             $data['usercom_key']     = $customerUsercomKey;
 
-            $this->logger->info("CustomerSync customAttrId:", $data);
+            $this->debug("CustomerSync customAttrId:", $data);
 
             $customerEmail = $customer->getEmail();
             $customerId    = $customer->getId();
@@ -105,14 +106,15 @@ class CustomerSync extends CustomerSyncAbstract
 
             $this->mapDataForUserCom($data, $customer);
             $this->helper->syncUserHash($data);
-            $this->logger->info("CustomerSync EOF", $data);
+            $this->debug("CustomerSync EOF", $data);
         }
-        $this->logger->info("CustomerSync EOF", []);
+        $this->debug("CustomerSync EOF", []);
     }
 
     public function mapDataForUserCom(&$customerData, $customer)
     {
         $fieldsMap = $this->dataHelper->getFieldMapping();
+        $this->calculateCustomer($customer);
         foreach ($fieldsMap as $field) {
             $fieldName = $field["name"];
             if (isset($field["mapping"]) && $field["mapping"] == "automatic") {
@@ -134,22 +136,43 @@ class CustomerSync extends CustomerSyncAbstract
         }
     }
 
+    public function calculateCustomer(&$customer): float
+    {
+        $searchCriteria = $this->searchCriteriaBuilder
+            ->addFilter('customer_id', $customer->getId())
+            ->addFilter('state', 'complete')
+            ->create();
+        $customerOrders = $this->orderRepository->getList($searchCriteria);
+        $ltv            = 0;
+        $cnt            = 0;
+        foreach ($customerOrders as $customerOrder) {
+            $orderData = $customerOrder->getData();
+            $ltv       += floatval($orderData["total_invoiced"]);
+            $cnt++;
+        }
+        $this->orders[$customer->getId()]['id']  = $customer->getId();
+        $this->orders[$customer->getId()]['ltv'] = $ltv;
+        $this->orders[$customer->getId()]['cnt'] = $cnt;
+        $this->orders[$customer->getId()]['aov'] = ($cnt > 0) ? round($ltv / $cnt, 2) : 0;
+
+        $this->logger->info("CustomerSync getOrdersLtv", $this->orders[$customer->getId()]);
+
+        return $ltv;
+    }
+
     public function getOrdersLtv(&$customer): float
     {
-        //TODO implement getOrdersLtv
-        return 0;
+        return $this->orders[$customer->getId()]['ltv'];
     }
 
     public function getOrdersAov(&$customer): float
     {
-        //TODO implement getOrdersAov
-        return 0;
+        return $this->orders[$customer->getId()]['aov'];
     }
 
     public function getOrdersCount(&$customer): float
     {
-        //TODO implement getOrdersCount
-        return 0;
+        return $this->orders[$customer->getId()]['cnt'];
     }
 
     public function getMarketingAllow(&$customer): float
