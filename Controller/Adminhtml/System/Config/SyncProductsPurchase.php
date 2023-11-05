@@ -29,8 +29,7 @@ class SyncProductsPurchase extends \Magento\Backend\App\Action
         $errorMessage = "";
         $key          = $_POST["time"] ?? null;
         $lastDay      = $_POST["lastDat"] ?? null;
-
-        if (is_null($key)) {
+        if (empty($key)) {
             return $this->result("Error: missing param", 400);
         }
         $key = (int)$key;
@@ -48,6 +47,7 @@ class SyncProductsPurchase extends \Magento\Backend\App\Action
                                                ->addAttributeToFilter('created_at', ['from' => $from])
                                                ->addAttributeToFilter('state', 'complete')
                                                ->load();
+
         try {
             foreach ($orders as $order) {
                 $data = [

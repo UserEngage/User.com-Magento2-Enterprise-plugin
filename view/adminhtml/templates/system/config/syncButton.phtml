@@ -26,12 +26,12 @@
 
                     var resultText = '';
                     if (response.status > 200) {
-                        resultText = response.statusText;
+                        resultText = response.status;
                     } else {
                         resultText = 'Success';
                         indicator.find('.collected').show();
                     }
-                    indicator.find('.status-text').html("Success");
+                    indicator.find('.status-text').html(resultText);
                 },
                 onFailure: function(response) {
 

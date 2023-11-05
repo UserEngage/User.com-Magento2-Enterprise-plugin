@@ -9,7 +9,7 @@ class ProductsPurchaseSyncButton extends \Magento\Config\Block\System\Config\For
 {
 
     const BUTTON_ID = "syncProductsPurchase";
-    const TIME_ID = "usercom_sync_productsPurchaseSyncTime";
+    const TIME_ID = "usercom_sync_customersSyncTime";
 
     protected $_template = 'Usercom_Analytics::system/config/syncButton.phtml';
 
