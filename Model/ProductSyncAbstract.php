@@ -298,6 +298,7 @@ class ProductSyncAbstract
 
             $cartEventData = [
                 'products'        => [],
+                'source'          => $messageData['source'] ?? null,
                 'tax'             => $order->getTaxAmount(),
                 'revenue'         => $order->getGrandTotal(),
                 'currency'        => $order->getOrderCurrencyCode(),

@@ -55,7 +55,8 @@ class SyncProductsPurchase extends \Magento\Backend\App\Action
                     'usercom_user_id' => null,
                     'user_key'        => null,
                     'time'            => $order->getCreatedAt(),
-                    'step'            => 'purchase'
+                    'step'            => 'purchase',
+                    'source'          => 'SYNC'
                 ];
                 $this->publisher->publish('usercom.order.purchase', json_encode($data));
             }
