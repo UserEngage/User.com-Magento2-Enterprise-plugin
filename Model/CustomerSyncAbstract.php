@@ -62,7 +62,15 @@ class CustomerSyncAbstract
         $eventData['email'] = $messageData['email'] ?? null;
 
         $customerId = $messageData['customerId'] ?? null;
-        $this->log('CustomerEvent' . $this->eventType, ['customerId' => $customerId]);
+        $this->debug(
+            'CustomerEvent: ' . $this->eventType,
+
+            [
+                'customerId'    => $customerId,
+                'usercomUserId' => $usercomUserId,
+                'usercomKey'    => $usercomKey
+            ]
+        );
 
         if ($customerId !== null) {
             $customer                = $this->customerRepository->getById($customerId);
@@ -81,9 +89,13 @@ class CustomerSyncAbstract
 
         $this->helper->updateCustomer($usercomUserId, $eventData);
 
-        $data          = $this->getEventData($usercomKey, $eventData);
-        $eventResponse = $this->helper->createEvent($data);
-//        $eventResponse = $this->helper->createEventByCustomId($usercomUserId,$data);
+        if ( ! empty($usercomUserId)) {
+            $data          = $this->getEventData(null, $eventData);
+            $eventResponse = $this->helper->createEventByCustomId($usercomUserId, $data);
+        } else {
+            $data          = $this->getEventData($usercomKey, $eventData);
+            $eventResponse = $this->helper->createEvent($data);
+        }
         $this->debug("CustomerEvent: " . $this->eventType, [json_encode($eventResponse)]);
     }
 
@@ -112,7 +124,9 @@ class CustomerSyncAbstract
         if ( ! empty($time) && is_string($time) && ! is_numeric($time)) {
             $time = strtotime($time);
         }
-        $userObject = $this->helper->getUserByUserKey($usercomKey);
+        if ( ! empty($usercomKey)) {
+            $userObject = $this->helper->getUserByUserKey($usercomKey);
+        }
 
         return [
             "name"      => $this->eventType,

@@ -147,14 +147,23 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @return void
      */
-    private function debug($name, $data, $response = [], $url = "", $mt = null): void
+    private function log($name, $data, $response = [], $url = "", $mt = null): void
     {
-        if ($this->debug) {
-            $this->logger->debug(
-                "UsercomPluginDebug: " . $name,
-                ['time' => $mt, 'url' => $url, 'REQUEST' => json_encode($data), "RESPONSE" => $response]
-            );
+        $dataToSend = [];
+
+        $dataToSend['request'] = $data;
+
+        if ( ! empty($url)) {
+            $dataToSend['url'] = $url;
         }
+        if ( ! empty($mt)) {
+            $dataToSend['mt'] = $mt;
+        }
+        if ( ! empty($response)) {
+            $dataToSend['response'] = $response;
+        }
+
+        $this->logger->info("UserComPlugin: " . $name, $dataToSend);
     }
 
     private function logError(string $name, $url, string $err, $response)
@@ -186,6 +195,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             }
         }
+        $this->debug('mapDataForUsercom', $mappedData);
 
         return $mappedData;
     }
@@ -280,6 +290,21 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         return $usercomProduct->id ?? null;
     }
 
+    /**
+     * @param $data
+     *
+     * @return void
+     */
+    private function debug($name, $data, $response = [], $url = "", $mt = null): void
+    {
+        if ($this->debug) {
+            $this->logger->debug(
+                "UsercomPluginDebug: " . $name,
+                ['time' => $mt, 'url' => $url, 'REQUEST' => json_encode($data), "RESPONSE" => $response]
+            );
+        }
+    }
+
     public function getProductByCustomId($custom_id)
     {
         return $this->sendCurl("products-by-id/$custom_id/details/");
@@ -292,30 +317,9 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function createProductEvent($id, $data)
     {
-        $this->log("Create ProductEvent " . $data['event_type'] . ':', ['id' => $data['id']]);
+        $this->debug("Create ProductEvent " . $data['event_type'] . ':', ['id' => $data['id']]);
 
         return $this->sendCurl("products/$id/product_event/", 'POST', $data);
-    }
-
-    /**
-     * @param $data
-     *
-     * @return void
-     */
-    private function log($name, $data, $response = [], $url = "", $mt = null): void
-    {
-        $dataToSend = [];
-
-        if ( ! empty($url)) {
-            $dataToSend['url'] = $url;
-        }
-        if ( ! empty($mt)) {
-            $dataToSend['mt'] = $mt;
-        }
-        if (isset($data['id'])) {
-            $dataToSend['id'] = $data['id'];
-        }
-        $this->logger->info("UserComPlugin: " . $name, $dataToSend);
     }
 
     public function createEvent($data)
@@ -325,7 +329,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
             $host                         = $_SERVER["BASE_SECURE_URL"] ?? $_SERVER["BASE_URL"];
             $data["data"]["store_source"] = $host . "/";
         }
-        $this->log("Create Event " . ($data['name'] ?? '') . ':', $data);
+        $this->debug("Create Event " . ($data['name'] ?? '') . ':', $data);
 
         return $this->sendCurl("events/", 'POST', $data);
     }
@@ -337,7 +341,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
             $data["data"]["store_source"] = $host . "/";
         }
 
-        return $this->sendCurl("/users-by-id/$userCustomId/events/", 'POST', $data);
+        return $this->sendCurl("users-by-id/$userCustomId/events/", 'POST', $data);
     }
 
     public function getUserByUserKey(string $usercomKey)
@@ -347,6 +351,10 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function updateCustomer($usercomId, array $data)
     {
-        return $this->sendCurl("users/$usercomId/", "PUT", $data);
+        if (empty($usercomId)) {
+            return;
+        }
+
+        return $this->sendCurl("users-by-id/$usercomId/", "PUT", $data);
     }
 }

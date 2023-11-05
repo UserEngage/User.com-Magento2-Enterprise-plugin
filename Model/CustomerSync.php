@@ -13,13 +13,16 @@ class CustomerSync extends CustomerSyncAbstract
      */
     public function register(string $message): void
     {
-        $this->eventType = $this->helper::EVENT_REGISTER;
-        $this->event($message);
-
         list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
         if (isset($messageData['customerId']) && ! empty($messageData['customerId'])) {
-            $this->syncCustomerById($messageData['customerId']);
+            list($usercomUserId, $usercomKey) = $this->syncCustomerById($messageData['customerId']);
+            $messageData['usercom_user_id'] = $usercomUserId;
+            $messageData['user_key']        = $usercomKey;
+            $message                        = json_encode($messageData);
         }
+
+        $this->eventType = $this->helper::EVENT_REGISTER;
+        $this->event($message);
     }
 
     /**
@@ -29,7 +32,7 @@ class CustomerSync extends CustomerSyncAbstract
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function syncCustomerById(string $customerId): void
+    public function syncCustomerById(string $customerId): array
     {
         $this->debug("CustomerSync", ['customerId:' => $customerId]);
         $customerId = $customerId ?? null;
@@ -42,14 +45,15 @@ class CustomerSync extends CustomerSyncAbstract
             $data['usercom_user_id'] = $customerUsercomUserId;
             $data['usercom_key']     = $customerUsercomKey;
 
-            $this->debug("CustomerSync customAttrId:", $data);
-
             $customerEmail = $customer->getEmail();
             $customerId    = $customer->getId();
+            $this->debug('CustomerData:', [json_encode($data)]);
 
             if (empty($customerUsercomUserId) || empty($customerUsercomKey)) {
                 $users = $this->helper->getUsersByEmail($customerEmail);
-                $user  = null;
+                $this->debug('$users:', [json_encode($users)]);
+
+                $user = null;
                 foreach ($users ?? [] as $u) {
                     if ($u->custom_id == $customerUsercomUserId) {
                         $user = $u;
@@ -60,38 +64,53 @@ class CustomerSync extends CustomerSyncAbstract
                 if ($user === null) {
                     $user = $this->helper->getCustomerByCustomId($customerUsercomUserId);
                 }
+                $this->debug('$user:', [json_encode($user)]);
                 if ($user === null && $users) {
                     $user = $users[0];
                 }
-                $hash = null;
-                if ($user !== null) {
-                    $hash = $user->custom_id ?? null;
+                if (empty($customerUsercomUserId)) {
+                    $hash = null;
+                    if ($user !== null) {
+                        $hash = $user->custom_id ?? null;
+                    }
+                    if (empty($hash)) {
+                        $hash = $this->helper->getUserHash($customerId);
+                    }
+                    $data['usercom_user_id'] = $hash;
+                    $customer->setCustomAttribute(
+                        'usercom_user_id',
+                        $hash
+                    );
+                    $this->customerRepository->save($customer);
                 }
-                if (empty($hash)) {
-                    $hash = $this->helper->getUserHash($customerId);
-                }
-                $data['usercom_user_id'] = $hash;
-                $customer->setCustomAttribute(
-                    'usercom_user_id',
-                    $hash
-                );
-                if ($user !== null) {
+                if ($user !== null && isset($user->user_key) && ! empty($user->user_key)) {
                     $customer->setCustomAttribute(
                         'usercom_key',
                         $user->user_key
                     );
+                    $this->customerRepository->save($customer);
                 }
-                $this->customerRepository->save($customer);
-//                if ($user !== null) {
-//                    $this->helper->syncUserById($user->id, $data);
-//                }
             }
 
             $this->mapDataForUserCom($data, $customer);
             $this->helper->syncUserHash($data);
+            if (empty($data['usercom_key'])) {
+                $userSynced = $this->helper->getCustomerByCustomId($data['usercom_user_id']);
+                $this->debug('$userSynced:', [json_encode($userSynced)]);
+                if ($userSynced && isset($userSynced->user_key) && ! empty($userSynced->user_key)) {
+                    $customer->setCustomAttribute(
+                        'usercom_key',
+                        $userSynced->user_key
+                    );
+                    $this->customerRepository->save($customer);
+                }
+            }
             $this->debug("CustomerSync EOF", $data);
+
+            return [$data['usercom_user_id'] ?? null, $data['usercom_key'] ?? null];
         }
-        $this->debug("CustomerSync EOF", []);
+
+        return [];
     }
 
     public function mapDataForUserCom(&$customerData, $customer)
@@ -140,7 +159,7 @@ class CustomerSync extends CustomerSyncAbstract
         $this->orders[$customer->getId()]['cnt'] = $cnt;
         $this->orders[$customer->getId()]['aov'] = ($cnt > 0) ? round($ltv / $cnt, 2) : 0;
 
-        $this->logger->info("CustomerSync getOrdersLtv", $this->orders[$customer->getId()]);
+        $this->logger->info("CustomerSync calculateCustomer", $this->orders[$customer->getId()]);
 
         return $ltv;
     }

@@ -49,12 +49,12 @@ abstract class EventAbstract
         if (is_null($userUserId)) {
             /** @var \Magento\Customer\Api\Data\CustomerInterface $customerEntity */
             $customerEntity = $this->customerRepository->getById($customerModel->getId());
-            $hash           = $this->usercom->getUserHash(
+            $userUserId     = $this->usercom->getUserHash(
                 $customerModel->getId()
             );
             $customerEntity->setCustomAttribute(
                 'usercom_user_id',
-                $hash
+                $userUserId
             );
 
             $this->customerRepository->save($customerEntity);
