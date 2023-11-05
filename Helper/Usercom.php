@@ -176,6 +176,9 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $mappedData['account_is_active']  = ! empty($data['confirmation']);
         $mappedData['First name']         = $data['firstname'];
         $mappedData['Last name']          = $data['lastname'];
+        if (isset($data['unsubscribed'])) {
+            $mappedData['unsubscribed'] = $data['unsubscribed'];
+        }
         foreach ($fieldsMap ?? [] as $field) {
             if (isset($data[$field['name']])) {
                 if ($field['mapping'] === 'automatic') {

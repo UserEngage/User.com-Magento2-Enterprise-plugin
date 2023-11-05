@@ -15,28 +15,11 @@ class CustomerSync extends CustomerSyncAbstract
     {
         $this->eventType = $this->helper::EVENT_REGISTER;
         $this->event($message);
-    }
 
-    /**
-     * @param string $message
-     *
-     * @return void
-     */
-    public function login(string $message): void
-    {
-        $this->eventType = $this->helper::EVENT_LOGIN;
-        $this->event($message);
-    }
-
-    /**
-     * @param string $message
-     *
-     * @return void
-     */
-    public function newsletter(string $message): void
-    {
-        $this->eventType = $this->helper::EVENT_NEWSLETTER_SIGN_UP;
-        $this->event($message);
+        list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
+        if (isset($messageData['customerId']) && ! empty($messageData['customerId'])) {
+            $this->syncCustomerById($messageData['customerId']);
+        }
     }
 
     /**
@@ -129,11 +112,13 @@ class CustomerSync extends CustomerSyncAbstract
                         $customerData[$fieldName] = $this->getOrdersCount($customer);
                         break;
                     case "marketing_allow":
-                        $customerData[$fieldName] = $this->getMarketingAllow($customer);
+                        $customerData[$fieldName]     = $this->getMarketingAllow($customer);
+                        $customerData['unsubscribed'] = $this->getMarketingAllow($customer) == 0;
                         break;
                 }
             }
         }
+        $this->debug("CustomerSync mapDataForUserCom", $customerData);
     }
 
     public function calculateCustomer(&$customer): float
@@ -177,7 +162,36 @@ class CustomerSync extends CustomerSyncAbstract
 
     public function getMarketingAllow(&$customer): float
     {
-        //TODO implement getMarketingAllow
-        return 1;
+        /** @var \Magento\Customer\Model\Customer $customer */
+        $checkSubscriber = $this->subscriber->loadByCustomer($customer->getId(), $customer->getWebsiteId());
+
+        return $checkSubscriber->isSubscribed() ? 1 : 0;
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return void
+     */
+    public function login(string $message): void
+    {
+        $this->eventType = $this->helper::EVENT_LOGIN;
+        $this->event($message);
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return void
+     */
+    public function newsletter(string $message): void
+    {
+        $this->eventType = $this->helper::EVENT_NEWSLETTER_SIGN_UP;
+        $this->event($message);
+
+        list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
+        if (isset($messageData['customerId']) && ! empty($messageData['customerId'])) {
+            $this->syncCustomerById($messageData['customerId']);
+        }
     }
 }

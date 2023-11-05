@@ -12,11 +12,13 @@ class CustomerSyncAbstract
     protected \Magento\Sales\Api\OrderRepositoryInterface $orderRepository;
     protected \Magento\Framework\Api\SearchCriteria $searchCriteria;
     protected \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder;
+    protected \Magento\Newsletter\Model\Subscriber $subscriber;
 
     protected string $eventType;
 
     public function __construct(
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
+        \Magento\Newsletter\Model\Subscriber $subscriber,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Framework\Api\SearchCriteria $searchCriteria,
@@ -25,6 +27,7 @@ class CustomerSyncAbstract
         \Psr\Log\LoggerInterface $logger
     ) {
         $this->customerRepository    = $customerRepository;
+        $this->subscriber            = $subscriber;
         $this->orderRepository       = $orderRepository;
         $this->helper                = $helper;
         $this->dataHelper            = $dataHelper;
