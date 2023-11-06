@@ -5,18 +5,18 @@ namespace Usercom\Analytics\Block;
 class Frontend extends \Magento\Framework\View\Element\Template
 {
     protected $helper;
-    protected $customerSession;
+    protected $httpContext;
 
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
      */
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
-        \Magento\Customer\Model\Session $customerSession,
+        \Magento\Framework\App\Http\Context $httpContext,
         \Usercom\Analytics\Helper\Data $helper
     ) {
-        $this->customerSession = $customerSession;
-        $this->helper          = $helper;
+        $this->httpContext = $httpContext;
+        $this->helper      = $helper;
         parent::__construct($context);
     }
 
@@ -37,11 +37,7 @@ class Frontend extends \Magento\Framework\View\Element\Template
 
     public function getUsercomUserId()
     {
-        return ($this->customerSession->isLoggedIn()) ? $this->customerSession->getCustomer()->getData('usercom_user_id') : "";
-    }
-
-    public function getUsercomKey()
-    {
-        return ($this->customerSession->isLoggedIn()) ? $this->customerSession->getCustomer()->getData('usercom_user_key') : "";
+        $isLoggedIn = $this->httpContext->getValue(\Magento\Customer\Model\Context::CONTEXT_AUTH);
+        return ($isLoggedIn) ? $this->httpContext->getValue('usercom_user_id') : "";
     }
 }

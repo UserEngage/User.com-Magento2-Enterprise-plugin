@@ -13,6 +13,7 @@ abstract class EventAbstract
     protected CustomerRegistry $customerRegistry;
     protected CustomerRepository $customerRepository;
     protected \Psr\Log\LoggerInterface $logger;
+    protected \Magento\Framework\App\Http\Context $httpContext;
 
     public function __construct(
         CustomerRegistry $customerRegistry,
@@ -20,6 +21,7 @@ abstract class EventAbstract
         \Usercom\Analytics\Helper\Data $helper,
         \Usercom\Analytics\Helper\Usercom $usercom,
         \Magento\Framework\MessageQueue\PublisherInterface $publisher,
+        \Magento\Framework\App\Http\Context $httpContext,
         \Psr\Log\LoggerInterface $logger
     ) {
         $this->customerRegistry   = $customerRegistry;
@@ -27,6 +29,7 @@ abstract class EventAbstract
         $this->helper             = $helper;
         $this->usercom            = $usercom;
         $this->publisher          = $publisher;
+        $this->httpContext        = $httpContext;
         $this->logger             = $logger;
     }
 
@@ -36,7 +39,7 @@ abstract class EventAbstract
         $userUserId    = null;
         if ($customerModel instanceof \Magento\Customer\Model\Data\Customer) {
             $userUserIdObject = $customerModel->getCustomAttribute('usercom_user_id');
-            if ( ! is_null($userUserIdObject)) {
+            if (! is_null($userUserIdObject)) {
                 $userUserId = $userUserIdObject->getValue() ?? null;
             }
         }
@@ -59,6 +62,8 @@ abstract class EventAbstract
 
             $this->customerRepository->save($customerEntity);
         }
+
+        $this->httpContext->setValue('usercom_user_id', $userUserId, false);
 
         return $userUserId;
     }

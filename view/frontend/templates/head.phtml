@@ -2,6 +2,7 @@
 
 if (isset($block) && $block->isModuleEnabled()): ?>
     <script data-cfasync="false" type="text/javascript">
+        console.log("<?php echo $block->getUsercomUserId() ?>");
         window.civchat = {
             apiKey: '<?= $block->getApi() ?>'
             <?php if ($id = $block->getUsercomUserId()): ?>
