@@ -52,7 +52,7 @@ class ProductSyncAbstract
      */
     protected function getProductIdentifier(\Magento\Catalog\Api\Data\ProductInterface $product): string
     {
-        $this->log('getProductIdentifier', ['identifier' => $this->identifier]);
+        $this->debug('getProductIdentifier', ['identifier' => $this->identifier]);
         if ($this->identifier == 'sku') {
             return trim(str_replace([' '], [''], $product->getSku()));
         } else {
