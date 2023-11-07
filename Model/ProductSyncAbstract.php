@@ -21,6 +21,7 @@ class ProductSyncAbstract
 
     protected string $productEventType;
     protected string $eventType;
+    protected string $identifier;
 
     public function __construct(
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository,
@@ -40,6 +41,23 @@ class ProductSyncAbstract
         $this->dataHelper         = $dataHelper;
         $this->productHelper      = $productHelper;
         $this->logger             = $logger;
+
+        $this->identifier = $this->dataHelper->getProductIdentifier();
+    }
+
+    /**
+     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     *
+     * @return string
+     */
+    protected function getProductIdentifier(\Magento\Catalog\Api\Data\ProductInterface $product): string
+    {
+        $this->log('getProductIdentifier', ['identifier' => $this->identifier]);
+        if ($this->identifier == 'sku') {
+            return trim(str_replace([' '], [''], $product->getSku()));
+        } else {
+            return $product->getId();
+        }
     }
 
     /**
@@ -114,7 +132,7 @@ class ProductSyncAbstract
               empty($productData['extension_attributes']->usercom_product_id))
         ) {
             $this->debug("extension_attributes usercom_product_id is empty", []);
-            $usercomProductId = $this->helper->getUsercomProductId($this->helper::PRODUCT_PREFIX . $product->getId());
+            $usercomProductId = $this->helper->getUsercomProductId($this->helper->getPrefix() . $this->getProductIdentifier($product));
             $this->debug("CatalogSync UCPID:", ['usercomProductId' => $usercomProductId]);
             if ($usercomProductId === null) {
                 $usercomProduct   = $this->helper->createProduct($productEventData);
@@ -136,9 +154,10 @@ class ProductSyncAbstract
         $brand        = '';
         $categoryName = '';
         $fileUrl      = $this->productHelper->getImageUrl($product);
+        $id           = $this->helper->getPrefix() . $this->getProductIdentifier($product);
         $data         = [
-            "id"            => $this->helper::PRODUCT_PREFIX . $product->getId(),
-            "custom_id"     => $this->helper::PRODUCT_PREFIX . $product->getId(),
+            "id"            => $id,
+            "custom_id"     => $id,
             'name'          => $product->getName(),
             'price'         => $price ?? (float)$product->getFinalPrice(),
             'quantity'      => $qty,

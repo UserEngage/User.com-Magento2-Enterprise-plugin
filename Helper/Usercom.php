@@ -1,5 +1,4 @@
 <?php
-
 namespace Usercom\Analytics\Helper;
 
 class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
@@ -23,51 +22,36 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     const PRODUCT_EVENT_CHECKOUT_OPTION = 'checkout option';
     const PRODUCT_EVENT_REFUND = 'refund';
     const PRODUCT_EVENT_PROMO_CLICK = 'promo click';
-
     const EVENT_PURCHASE = 'purchase_details';
     const EVENT_CHECKOUT = 'order_details';
-
     const EVENT_LOGIN = 'login';
     const EVENT_REGISTER = 'register';
     const EVENT_NEWSLETTER_SIGN_UP = 'newsletter_signup';
-    public $debug = false;
-    protected $helper;
-    protected $cookieManager;
-    protected $storeManager;
-    protected $productRepositoryFactory;
-    protected $subscriber;
-    protected $customerSession;
-    protected $customer;
-    protected $product;
-    protected $resourceConnection;
+    public bool $debug = false;
+    public string $prefix = "";
+    private Data $helper;
+    private \Magento\Framework\Stdlib\CookieManagerInterface $cookieManager;
+    private \Psr\Log\LoggerInterface $logger;
 
     public function __construct(
         \Usercom\Analytics\Helper\Data $helper,
         \Magento\Framework\Stdlib\CookieManagerInterface $cookieManager,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Catalog\Api\ProductRepositoryInterfaceFactory $productRepositoryFactory,
-        \Magento\Newsletter\Model\Subscriber $subscriber,
-        \Magento\Customer\Model\Session $customerSession,
-        \Magento\Customer\Model\Customer $customer,
-        \Magento\Catalog\Model\Product $product,
-        \Magento\Framework\App\ResourceConnection $resourceConnection,
         \Magento\Framework\App\Helper\Context $context,
         \Psr\Log\LoggerInterface $logger
     ) {
-        $this->helper                   = $helper;
-        $this->cookieManager            = $cookieManager;
-        $this->storeManager             = $storeManager;
-        $this->productRepositoryFactory = $productRepositoryFactory;
-        $this->subscriber               = $subscriber;
-        $this->customerSession          = $customerSession;
-        $this->customer                 = $customer;
-        $this->product                  = $product;
-        $this->resourceConnection       = $resourceConnection;
-        $this->logger                   = $logger;
+        $this->helper        = $helper;
+        $this->cookieManager = $cookieManager;
+        $this->logger        = $logger;
+        $this->prefix        = $this->helper->getPrefix() ?? '';
         if (defined('USER_COM_DEBUG')) {
             $this->debug = USER_COM_DEBUG;
         }
         parent::__construct($context);
+    }
+
+    public function getPrefix(): string
+    {
+        return $this->prefix;
     }
 
     /**
@@ -147,23 +131,14 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @return void
      */
-    private function log($name, $data, $response = [], $url = "", $mt = null): void
+    private function debug($name, $data, $response = [], $url = "", $mt = null): void
     {
-        $dataToSend = [];
-
-        $dataToSend['request'] = $data;
-
-        if ( ! empty($url)) {
-            $dataToSend['url'] = $url;
+        if ($this->debug) {
+            $this->logger->debug(
+                "UsercomPluginDebug: " . $name,
+                ['time' => $mt, 'url' => $url, 'REQUEST' => json_encode($data), "RESPONSE" => $response]
+            );
         }
-        if ( ! empty($mt)) {
-            $dataToSend['mt'] = $mt;
-        }
-        if ( ! empty($response)) {
-            $dataToSend['response'] = $response;
-        }
-
-        $this->logger->info("UserComPlugin: " . $name, $dataToSend);
     }
 
     private function logError(string $name, $url, string $err, $response)
@@ -290,21 +265,6 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         return $usercomProduct->id ?? null;
     }
 
-    /**
-     * @param $data
-     *
-     * @return void
-     */
-    private function debug($name, $data, $response = [], $url = "", $mt = null): void
-    {
-        if ($this->debug) {
-            $this->logger->debug(
-                "UsercomPluginDebug: " . $name,
-                ['time' => $mt, 'url' => $url, 'REQUEST' => json_encode($data), "RESPONSE" => $response]
-            );
-        }
-    }
-
     public function getProductByCustomId($custom_id)
     {
         return $this->sendCurl("products-by-id/$custom_id/details/");
@@ -356,5 +316,29 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         return $this->sendCurl("users-by-id/$usercomId/", "PUT", $data);
+    }
+
+    /**
+     * @param $data
+     *
+     * @return void
+     */
+    private function log($name, $data, $response = [], $url = "", $mt = null): void
+    {
+        $dataToSend = [];
+
+        $dataToSend['request'] = $data;
+
+        if ( ! empty($url)) {
+            $dataToSend['url'] = $url;
+        }
+        if ( ! empty($mt)) {
+            $dataToSend['mt'] = $mt;
+        }
+        if ( ! empty($response)) {
+            $dataToSend['response'] = $response;
+        }
+
+        $this->logger->info("UserComPlugin: " . $name, $dataToSend);
     }
 }

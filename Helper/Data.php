@@ -9,6 +9,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_ENABLE = 'usercom/general/enable';
     const XML_TOKEN = 'usercom/general/token';
     const XML_API = 'usercom/general/api';
+    const XML_PRODUCT_IDENTIFIER = 'usercom/general/product_identifier';
+    const XML_PREFIX = 'usercom/general/prefix';
     const XML_SUBDOMAIN = 'usercom/general/subdomain';
     const XML_SENDSTORESOURCE = 'usercom/general/sendStoreSource';
     const XML_FIELD_MAPPING = 'usercom/sync/fieldMapping';
@@ -57,6 +59,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getSubdomain()
     {
         return $this->getConfigValue(self::XML_SUBDOMAIN);
+    }
+
+    public function getProductIdentifier()
+    {
+        return $this->getConfigValue(self::XML_PRODUCT_IDENTIFIER);
+    }
+
+    public function getPrefix()
+    {
+        return $this->getConfigValue(self::XML_PREFIX) ?? '';
     }
 
     public function getFieldMapping()
