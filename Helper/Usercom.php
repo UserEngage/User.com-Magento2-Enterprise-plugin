@@ -155,7 +155,6 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
         $fieldsMap                        = $this->helper->getFieldMapping();
         $mappedData                       = [];
         $mappedData['email']              = $data['email'];
-        $mappedData['user_key']           = $data['user_key'];
         $mappedData['user_id']            = $data['usercom_user_id'];
         $mappedData['custom_id']          = $data['usercom_user_id'];
         $mappedData['account_created_at'] = $data['created_at'];

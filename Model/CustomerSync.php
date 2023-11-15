@@ -36,24 +36,22 @@ class CustomerSync extends CustomerSyncAbstract
     {
         $this->debug("CustomerSync", ['customerId:' => $customerId]);
         $customerId = $customerId ?? null;
+        $user       = null;
         if ($customerId !== null) {
             $customer = $this->customerRepository->getById($customerId);
             $data     = $customer->__toArray();
 
-            $customerUsercomUserId   = $data['custom_attributes']['usercom_user_id']['value'] ?? null;
-            $customerUsercomKey      = $data['custom_attributes']['usercom_key']['value'] ?? null;
-            $data['usercom_user_id'] = $customerUsercomUserId;
-            $data['usercom_key']     = $customerUsercomKey;
+            $customerUsercomUserId = $data['usercom_user_id'] = $data['custom_attributes']['usercom_user_id']['value'] ?? null;
+            $customerUsercomKey    = $data['usercom_key'] = $data['custom_attributes']['usercom_key']['value'] ?? null;
 
             $customerEmail = $customer->getEmail();
             $customerId    = $customer->getId();
             $this->debug('CustomerData:', [json_encode($data)]);
 
-            if (empty($customerUsercomUserId) || empty($customerUsercomKey)) {
+            if (empty($customerUsercomKey)) {
                 $users = $this->helper->getUsersByEmail($customerEmail);
                 $this->debug('$users:', [json_encode($users)]);
 
-                $user = null;
                 foreach ($users ?? [] as $u) {
                     if ($u->custom_id == $customerUsercomUserId) {
                         $user = $u;
@@ -93,7 +91,13 @@ class CustomerSync extends CustomerSyncAbstract
             }
 
             $this->mapDataForUserCom($data, $customer);
-            $this->helper->syncUserHash($data);
+
+            if ( ! empty($data['usercom_key'])) {
+                $userByKey = $this->helper->getUserByUserKey($data['usercom_key'] ?? null);
+                $this->helper->syncUserById($userByKey->id ?? null, $data);
+            } else {
+                $this->helper->syncUserHash($data);
+            }
             if (empty($data['usercom_key'])) {
                 $userSynced = $this->helper->getCustomerByCustomId($data['usercom_user_id']);
                 $this->debug('$userSynced:', [json_encode($userSynced)]);
