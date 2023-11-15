@@ -1,6 +1,6 @@
 {
   "name": "usercom/user-com-magento-2-enterprise-integration",
-  "version": "0.3.0",
+  "version": "dev-1.0.0-rc",
   "description": "Official User.com plugin to integrate with Magento 2 Enterprise Edition",
   "type": "magento2-module",
   "require": {
