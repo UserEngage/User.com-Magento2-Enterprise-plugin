@@ -1,15 +1,19 @@
 <?php
+
 namespace Usercom\Analytics\Helper;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
 
-    const XML_PATH              = 'usercom/';
-    const XML_ENABLE            = 'usercom/general/enable';
-    const XML_TOKEN             = 'usercom/general/token';
-    const XML_API               = 'usercom/general/api';
-    const XML_SUBDOMAIN         = 'usercom/general/subdomain';
-    const XML_SENDSTORESOURCE   = 'usercom/general/sendStoreSource';
+    const XML_PATH = 'usercom/';
+    const XML_ENABLE = 'usercom/general/enable';
+    const XML_TOKEN = 'usercom/general/token';
+    const XML_API = 'usercom/general/api';
+    const XML_PRODUCT_IDENTIFIER = 'usercom/general/product_identifier';
+    const XML_PREFIX = 'usercom/general/prefix';
+    const XML_SUBDOMAIN = 'usercom/general/subdomain';
+    const XML_SENDSTORESOURCE = 'usercom/general/sendStoreSource';
+    const XML_FIELD_MAPPING = 'usercom/sync/fieldMapping';
 
     /**
      * @param \Magento\Framework\App\Helper\Context $context
@@ -20,42 +24,60 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         parent::__construct($context);
     }
 
-    public function getConfigValue($field, $storeId = null){
-
-        return $this->scopeConfig->getValue(
-            $field, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId
-        );
-    }
-
-    public function getGeneralConfig($code, $storeId = null){
-
+    public function getGeneralConfig($code, $storeId = null)
+    {
         return $this->getConfigValue(
-            self::XML_PATH . $code, $storeId
+            self::XML_PATH . $code,
+            $storeId
         );
     }
 
-    public function isModuleEnabled(){
+    public function getConfigValue($field, $storeId = null)
+    {
+        return $this->scopeConfig->getValue(
+            $field,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+    }
 
+    public function isModuleEnabled()
+    {
         return $this->getConfigValue(self::XML_ENABLE);
     }
 
-    public function getToken(){
-
+    public function getToken()
+    {
         return $this->getConfigValue(self::XML_TOKEN);
     }
 
-    public function getApi(){
-
+    public function getApi()
+    {
         return $this->getConfigValue(self::XML_API);
     }
 
-    public function getSubdomain(){
-
+    public function getSubdomain()
+    {
         return $this->getConfigValue(self::XML_SUBDOMAIN);
     }
 
-    public function sendStoreSource(){
+    public function getProductIdentifier()
+    {
+        return $this->getConfigValue(self::XML_PRODUCT_IDENTIFIER);
+    }
 
+    public function getPrefix()
+    {
+        return $this->getConfigValue(self::XML_PREFIX) ?? '';
+    }
+
+    public function getFieldMapping()
+    {
+        return json_decode($this->getConfigValue(self::XML_FIELD_MAPPING) ?? '[]', true);
+    }
+
+    public function sendStoreSource()
+    {
         return $this->getConfigValue(self::XML_SENDSTORESOURCE);
     }
 }

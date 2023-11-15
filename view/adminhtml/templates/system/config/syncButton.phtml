@@ -1,0 +1,58 @@
+<script>
+    require([
+        'jquery',
+        'prototype'
+    ], function(jQuery){
+
+        var indicator = jQuery('.sync-indicator#<?=$block->getButtonId()?>');
+        var error =  jQuery('.error-message#<?=$block->getButtonId()?>');
+
+        jQuery('#<?= $block->getButtonId() ?>').click(function () {
+            var params = {
+                "time": jQuery("#<?= $block->getTimeId() ?>").val()
+            };
+            new Ajax.Request('<?= $block->getAjaxUrl() ?>', {
+                parameters:     params,
+                loaderArea:     false,
+                asynchronous:   true,
+                onCreate: function() {
+                    indicator.find('.collected').hide();
+                    indicator.find('.processing').show();
+                    indicator.find('.status-text').text('');
+                    error.html('');
+                },
+                onSuccess: function(response) {
+                    indicator.find('.processing').hide();
+
+                    var resultText = '';
+                    if (response.status > 200) {
+                        resultText = response.status;
+                    } else {
+                        resultText = 'Success';
+                        indicator.find('.collected').show();
+                    }
+                    indicator.find('.status-text').html(resultText);
+                },
+                onFailure: function(response) {
+
+                    indicator.find('.processing').hide();
+                    resultText = response.responseJSON["status"];
+                    indicator.find('.status-text').html("Error");
+                    error.html(resultText);
+                }
+            });
+        });
+
+    });
+</script>
+
+<?php echo $block->getButtonHtml() ?>
+<div id="<?= $block->getButtonId()?>" class="sync-indicator" style="display:inline-block">
+    <span class="sync-indicator">
+        <img class="processing" hidden="hidden" alt="Synchronize" style="margin:0 5px" src="<?php echo $block->getViewFileUrl('images/process_spinner.gif') ?>"/>
+        <img class="collected" hidden="hidden" alt="Synchronized" style="margin:-3px 5px" src="<?php echo $block->getViewFileUrl('images/rule_component_apply.gif') ?>"/>
+        <span class="status-text"></span>
+    </span>
+</div>
+<div id="<?= $block->getButtonId()?>" class="error-message">
+</div>

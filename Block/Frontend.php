@@ -5,7 +5,7 @@ namespace Usercom\Analytics\Block;
 class Frontend extends \Magento\Framework\View\Element\Template
 {
     protected $helper;
-    protected $customerSession;
+    protected $httpContext;
 
     /**
      * @param \Magento\Framework\View\Element\Template\Context $context
@@ -16,7 +16,7 @@ class Frontend extends \Magento\Framework\View\Element\Template
         \Usercom\Analytics\Helper\Data $helper
     ) {
         $this->httpContext = $httpContext;
-        $this->helper          = $helper;
+        $this->helper      = $helper;
         parent::__construct($context);
     }
 

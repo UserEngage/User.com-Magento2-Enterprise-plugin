@@ -37,8 +37,6 @@ class CustomerDataContext
      */
     public function beforeExecute(ActionInterface $subject)
     {
-        if ($this->customerSession->getCustomer() !== null) {
-            $this->httpContext->setValue('usercom_user_id', $this->customerSession->getCustomer()->getData('usercom_user_id'), false);
-        }
+        $this->httpContext->setValue('usercom_user_id', $this->customerSession->getCustomer()->getData('usercom_user_id'), false);
     }
 }

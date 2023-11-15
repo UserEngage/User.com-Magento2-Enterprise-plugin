@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="usercom.customer.sync" request="string">
+        <handler name="usercomCustomerSync" type="Usercom\Analytics\Model\CustomerSync" method="syncCustomerById"/>
+    </topic>
+    <topic name="usercom.catalog.product.event" request="string">
+        <handler name="usercomCatalogProductView" type="Usercom\Analytics\Model\CatalogSync" method="productView"/>
+    </topic>
+    <topic name="usercom.cart.product.add" request="string">
+        <handler name="usercomCartProductAdd" type="Usercom\Analytics\Model\CartSync" method="add"/>
+    </topic>
+    <topic name="usercom.cart.product.remove" request="string">
+        <handler name="usercomCartProductRemove" type="Usercom\Analytics\Model\CartSync" method="remove"/>
+    </topic>
+    <topic name="usercom.cart.checkout" request="string">
+        <handler name="usercomCartCheckout" type="Usercom\Analytics\Model\CartSync" method="checkout"/>
+    </topic>
+    <topic name="usercom.order.purchase" request="string">
+        <handler name="usercomORderPurchase" type="Usercom\Analytics\Model\CartSync" method="purchase"/>
+    </topic>
+    <topic name="usercom.customer.login" request="string">
+        <handler name="usercomCustomerLogin" type="Usercom\Analytics\Model\CustomerSync" method="login"/>
+    </topic>
+    <topic name="usercom.customer.register" request="string">
+        <handler name="usercomCustomerRegister" type="Usercom\Analytics\Model\CustomerSync" method="register"/>
+    </topic>
+    <topic name="usercom.customer.newsletter" request="string">
+        <handler name="usercomCustomerNewsletter" type="Usercom\Analytics\Model\CustomerSync" method="newsletter"/>
+    </topic>
+</config>

@@ -1,0 +1,143 @@
+<script>
+    require([
+        'jquery',
+        'prototype'
+    ], function (jQuery) {
+
+        let indicator = jQuery('.sync-indicator#<?=$block->getButtonId()?>');
+        let error = jQuery('.error-message#<?=$block->getButtonId()?>');
+        let baseFields = JSON.parse('<?=json_encode($block->getFields())?>')
+        let syncField = function (params) {
+            new Ajax.Request('<?= $block->getSyncAjaxUrl() ?>', {
+                parameters: params,
+                method: 'POST',
+                loaderArea: false,
+                asynchronous: true,
+                onCreate: function () {
+                    indicator.find('.collected').hide();
+                    indicator.find('.processing').show();
+                    indicator.find('.status-text').text('');
+                    error.html('');
+                },
+                onSuccess: function (response) {
+                    console.log(response)
+                    loadList()
+                }
+            })
+        }
+        let loadList = function () {
+            var params = {};
+            new Ajax.Request('<?= $block->getAjaxUrl() ?>', {
+                parameters: params,
+                method: 'GET',
+                loaderArea: false,
+                asynchronous: true,
+                onCreate: function () {
+                    indicator.find('.collected').hide();
+                    indicator.find('.processing').show();
+                    indicator.find('.status-text').text('');
+                    error.html('');
+                },
+                onSuccess: function (response) {
+                    indicator.find('.processing').hide();
+                    // TODO array merge by name and show table to manage
+                    const headerRow = {
+                        id: 'ID', name: 'name', value_type: 'Value Type', mapping: "Field Mapping"
+                        // content_type: 'Type', id: 'ID', name: 'name', value_type: 'Value Type'
+                    }
+                    let fields = {
+                        header: headerRow
+                    };
+
+                    baseFields.map(item => {
+                        fields[item.name] = item;
+                    })
+                    response.responseJSON.data.map(item => {
+                        if (fields[item.name]) {
+                            fields[item.name] = {...fields[item.name], ...item}
+                        } else {
+                            fields[item.name] = item;
+                        }
+                    })
+                    jQuery("#attributesSyncRow").remove();
+                    let table = jQuery('<tr id="attributesSyncRow"><td colspan="3"><table id="attributesSyncTable"></table></td></tr>');
+                    let syncRow = jQuery('#row_usercom_sync_attributesSyncButton');
+                    syncRow.after(table)
+                    let syncTable = jQuery('#attributesSyncTable')
+                    let saveButton = jQuery('<a class="scalable save primary abs-action-primary ui-button ui-corner-all ui-widget" style="cursor: pointer;">Store mapping</a>')
+                    saveButton.click(() => {
+                        let fieldsToSave = Object.values(fields)
+                        fieldsToSave.shift()
+                        fieldsToSave = fieldsToSave.filter((item) => {
+                            return !!item.id && !!item.mapping
+                        })
+                        fieldsToSave = fieldsToSave.map(item => {
+                            return {
+                                name: item.name,
+                                mapping: item.mapping
+                            }
+                        })
+                        fieldsToSave = JSON.stringify(fieldsToSave)
+                        jQuery("#usercom_sync_fieldMapping").val(fieldsToSave)
+                        jQuery("#attributesSyncRow").remove();
+                    })
+                    syncTable.append(saveButton)
+                    Object.keys(fields).map(item => {
+                        let row = jQuery('<tr class="row"></tr>')
+                        Object.keys(headerRow).map(cell => {
+                            let blank = ''
+                            row.append(
+                                '<td>' +
+                                (fields[item][cell] ?? blank) +
+                                '</td>'
+                            )
+                            if (cell === 'id' && !fields[item][cell]) {
+                                let btn = jQuery('<a class="scalable save primary abs-action-primary ui-button ui-corner-all ui-widget" style="cursor: pointer;">SYNC</a>');
+                                btn.click(() => {
+                                    syncField({name: fields[item].name, value_type: fields[item].value_type})
+                                })
+                                row.children('td').append(btn)
+                            }
+                        })
+                        syncTable.append(row)
+
+                    })
+
+                    var resultText = '';
+                    if (response.status > 200) {
+                        resultText = response.statusText;
+                    } else {
+                        resultText = 'Success';
+                        indicator.find('.collected').show();
+                    }
+                    indicator.find('.status-text').html("Success");
+                },
+                onFailure: function (response) {
+
+                    indicator.find('.processing').hide();
+                    resultText = response.responseJSON["status"];
+                    indicator.find('.status-text').html("Error");
+                    error.html(resultText);
+                }
+            });
+        }
+        jQuery('#<?= $block->getButtonId() ?>').click(() => {
+            loadList()
+        });
+
+    });
+</script>
+
+<?php
+echo $block->getButtonHtml() ?>
+<div id="<?= $block->getButtonId() ?>" class="sync-indicator" style="display:inline-block">
+    <span class="sync-indicator">
+        <img class="processing" hidden="hidden" alt="Synchronize" style="margin:0 5px" src="<?php
+        echo $block->getViewFileUrl('images/process_spinner.gif') ?>"/>
+        <img class="collected" hidden="hidden" alt="Synchronized" style="margin:-3px 5px" src="<?php
+        echo $block->getViewFileUrl('images/rule_component_apply.gif') ?>"/>
+        <span class="status-text"></span>
+    </span>
+</div>
+<div id="<?= $block->getButtonId() ?>" class="error-message">
+</div>
