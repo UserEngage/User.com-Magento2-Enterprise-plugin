@@ -6,8 +6,4 @@
                 type="Usercom\Analytics\Plugin\Frontend\Magento\Checkout\Model\Type\Onepage" sortOrder="10"
                 disabled="false"/>
     </type>
-    <type name="Magento\Framework\App\ActionInterface">
-        <plugin name="Usercom_Analytics_Plugin_Magento_Framework_App_ActionInterface"
-                type="Usercom\Analytics\Plugin\CustomerDataContext"/>
-    </type>
 </config>
