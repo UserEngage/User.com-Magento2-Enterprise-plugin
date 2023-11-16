@@ -27,6 +27,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     const EVENT_CHECKOUT = 'order_details';
     const EVENT_LOGIN = 'login';
     const EVENT_REGISTER = 'register';
+    const EVENT_AUTHORIZE = 'authorize';
     const EVENT_NEWSLETTER_SIGN_UP = 'newsletter_signup';
     public bool $debug = false;
     public string $prefix = "";

@@ -199,6 +199,7 @@ class CustomerSync extends CustomerSyncAbstract
     public function login(string $message): void
     {
         $this->eventType = $this->helper::EVENT_LOGIN;
+        $this->authorizeIfNeeded($message);
         $this->event($message);
     }
 
