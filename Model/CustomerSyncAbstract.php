@@ -147,7 +147,7 @@ class CustomerSyncAbstract
 
         $customerId = $messageData['customerId'] ?? null;
         $this->debug(
-            'CustomerEvent: ' . $this->eventType,
+            'CustomerEventBegin: ' . $this->eventType,
             [
                 'customerId'    => $customerId,
                 'usercomUserId' => $usercomUserId,
@@ -159,24 +159,15 @@ class CustomerSyncAbstract
             $customer                = $this->customerRepository->getById($customerId);
             $eventData['First name'] = $customer->getFirstname();
             $eventData['Last name']  = $customer->getLastname();
+            $this->helper->updateCustomer($usercomUserId, $eventData);
         }
-        $this->debug(
-            "CustomerEvent: " . $this->eventType,
-            [
-                'usercom_user_id' => $usercomUserId ?? null,
-                'usercom_key'     => $usercomKey ?? null,
-                'moduleEnabled'   => $this->dataHelper->isModuleEnabled(),
-                'eventData'       => $eventData ?? []
-            ]
-        );
-
-        $this->helper->updateCustomer($usercomUserId, $eventData);
-
         if (! empty($usercomUserId)) {
-            $data          = $this->getEventData($eventData, null);
+            $data = $this->getEventData($eventData, null);
+            $this->debug("CustomerEventData: " . $this->eventType, $data);
             $eventResponse = $this->helper->createEventByCustomId($usercomUserId, $data);
         } else {
-            $data          = $this->getEventData($eventData, $usercomKey);
+            $data = $this->getEventData($eventData, $usercomKey);
+            $this->debug("CustomerEventData: " . $this->eventType, $data);
             $eventResponse = $this->helper->createEvent($data);
         }
         $this->debug("CustomerEvent: " . $this->eventType, [json_encode($eventResponse)]);
