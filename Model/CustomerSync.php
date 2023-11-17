@@ -101,6 +101,7 @@ class CustomerSync extends CustomerSyncAbstract
                         'usercom_key',
                         null
                     );
+                    $data['usercom_key'] = null;
                     $this->customerRepository->save($customer);
                     $this->helper->syncUserHash($data);
                 }
