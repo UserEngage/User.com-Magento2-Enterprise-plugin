@@ -136,7 +136,7 @@ class Usercom extends \Magento\Framework\App\Helper\AbstractHelper
     private function debug($name, $data, $response = [], $url = "", $mt = null): void
     {
         if ($this->debug) {
-            $this->logger->debug(
+            $this->logger->info(
                 "UsercomPluginDebug: " . $name,
                 ['time' => $mt, 'url' => $url, 'REQUEST' => json_encode($data), "RESPONSE" => $response]
             );

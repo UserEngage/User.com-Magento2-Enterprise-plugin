@@ -94,7 +94,16 @@ class CustomerSync extends CustomerSyncAbstract
 
             if ( ! empty($data['usercom_key'])) {
                 $userByKey = $this->helper->getUserByUserKey($data['usercom_key'] ?? null);
-                $this->helper->syncUserById($userByKey->id ?? null, $data);
+                if ( ! empty($userByKey)) {
+                    $this->helper->syncUserById($userByKey->id ?? null, $data);
+                } else {
+                    $customer->setCustomAttribute(
+                        'usercom_key',
+                        null
+                    );
+                    $this->customerRepository->save($customer);
+                    $this->helper->syncUserHash($data);
+                }
             } else {
                 $this->helper->syncUserHash($data);
             }
