@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
-    <exchange name="magento">
+    <exchange name="magento" connection="amqp">
         <binding id="bindCustomerSync" topic="usercom.customer.sync" destination="usercom.customer.sync"/>
         <binding id="bindCustomerLogin" topic="usercom.customer.login" destination="usercom.customer.login"/>
         <binding id="bindCustomerRegister" topic="usercom.customer.register" destination="usercom.customer.register"/>
