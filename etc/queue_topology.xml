@@ -2,14 +2,23 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
     <exchange name="magento" connection="amqp">
-        <binding id="bindCustomerSync" topic="usercom.customer.sync" destination="usercom.customer.sync"/>
-        <binding id="bindCustomerLogin" topic="usercom.customer.login" destination="usercom.customer.login"/>
-        <binding id="bindCustomerRegister" topic="usercom.customer.register" destination="usercom.customer.register"/>
-        <binding id="bindCustomerNewsletter" topic="usercom.customer.newsletter" destination="usercom.customer.newsletter"/>
-        <binding id="bindCatalogProductEvent" topic="usercom.catalog.product.event" destination="usercom.catalog.product.event"/>
-        <binding id="bindCartProductAdd" topic="usercom.cart.product.add" destination="usercom.cart.product.add"/>
-        <binding id="bindCartProductRemove" topic="usercom.cart.product.remove" destination="usercom.cart.product.remove"/>
-        <binding id="bindCartCheckout" topic="usercom.cart.checkout" destination="usercom.cart.checkout"/>
-        <binding id="bindOrderPurchase" topic="usercom.order.purchase" destination="usercom.order.purchase"/>
+        <binding id="bindCustomerSync" topic="usercom.customer.sync"
+                 destination="usercom.customer.sync" destinationType="queue"/>
+        <binding id="bindCustomerLogin" topic="usercom.customer.login"
+                 destination="usercom.customer.login"  destinationType="queue"/>
+        <binding id="bindCustomerRegister" topic="usercom.customer.register"
+                 destination="usercom.customer.register" destinationType="queue"/>
+        <binding id="bindCustomerNewsletter" topic="usercom.customer.newsletter"
+                 destination="usercom.customer.newsletter" destinationType="queue"/>
+        <binding id="bindCatalogProductEvent" topic="usercom.catalog.product.event"
+                 destination="usercom.catalog.product.event" destinationType="queue"/>
+        <binding id="bindCartProductAdd" topic="usercom.cart.product.add"
+                 destination="usercom.cart.product.add" destinationType="queue"/>
+        <binding id="bindCartProductRemove" topic="usercom.cart.product.remove"
+                 destination="usercom.cart.product.remove" destinationType="queue"/>
+        <binding id="bindCartCheckout" topic="usercom.cart.checkout"
+                 destination="usercom.cart.checkout" destinationType="queue"/>
+        <binding id="bindOrderPurchase" topic="usercom.order.purchase"
+                 destination="usercom.order.purchase" destinationType="queue"/>
     </exchange>
 </config>
