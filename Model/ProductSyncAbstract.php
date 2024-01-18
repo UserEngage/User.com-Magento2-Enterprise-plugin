@@ -73,7 +73,7 @@ class ProductSyncAbstract
             return;
         }
 
-        list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
+        [$usercomUserId, $usercomKey, $messageData] = $this->extractParams($message);
         $productId = $messageData['productId'];
         $this->debug('ProductView', ['productId' => $productId]);
 
@@ -86,7 +86,7 @@ class ProductSyncAbstract
         );
 
         if ($productId !== null) {
-            list($productEventData, $usercomProductId) = $this->prepareProduct($productId);
+            [$productEventData, $usercomProductId] = $this->prepareProduct($productId);
 
             $data          = $this->getProductEventData($productId, $productEventData, $usercomKey, $messageData['time'] ?? null);
             $eventResponse = $this->helper->createProductEvent($usercomProductId, $data);
@@ -187,7 +187,9 @@ class ProductSyncAbstract
 //            if ( ! empty($usercomUserId)) {
 //                $data["custom_id"] = $usercomUserId ?? null;
 //            }
-        $userObject = $this->helper->getUserByUserKey($usercomKey);
+        if(!empty($usercomKey)) {
+            $userObject = $this->helper->getUserByUserKey($usercomKey);
+        }
 
         return [
             "id"         => $this->helper::PRODUCT_PREFIX . $productId,
@@ -212,7 +214,7 @@ class ProductSyncAbstract
             return;
         }
 
-        list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
+        [$usercomUserId, $usercomKey, $messageData] = $this->extractParams($message);
         $quoteId = $messageData['quote_id'];
         $this->debug('CartEvent', ['quoteId' => $quoteId]);
 
@@ -244,7 +246,7 @@ class ProductSyncAbstract
                 $this->debug("ProductInCart: ", ['id' => $item->getProductId(), 'qty' => $item->getQty(), 'price' => $item->getPrice()]);
 
                 /** @var CartItemInterface $item */
-                list($productEventData, $usercomProductId) = $this->prepareProduct(
+                [$productEventData, $usercomProductId] = $this->prepareProduct(
                     $item->getProductId(),
                     $item->getQty(),
                     $item->getPrice()
@@ -274,8 +276,9 @@ class ProductSyncAbstract
 //            if ( ! empty($usercomUserId)) {
 //                $data["custom_id"] = $usercomUserId ?? null;
 //            }
-        $userObject = $this->helper->getUserByUserKey($usercomKey);
-
+        if(!empty($usercomKey)){
+            $userObject = $this->helper->getUserByUserKey($usercomKey);
+        }
         return [
             "data"      => $data,
             "name"      => $this->eventType,
@@ -297,7 +300,7 @@ class ProductSyncAbstract
         if ( ! $this->dataHelper->isModuleEnabled()) {
             return;
         }
-        list($usercomUserId, $usercomKey, $messageData) = $this->extractParams($message);
+        [$usercomUserId, $usercomKey, $messageData] = $this->extractParams($message);
         $orderId = $messageData['order_id'] ?? null;
         $this->debug("OrderStart: " . $this->productEventType, [json_encode($messageData)]);
 
@@ -330,7 +333,7 @@ class ProductSyncAbstract
             $this->debug("OrderEvent: " . $this->productEventType, [json_encode($cartEventData)]);
             foreach ($items as $item) {
                 /** @var OrderItemInterface $item */
-                list($productEventData, $usercomProductId) = $this->prepareProduct(
+                [$productEventData, $usercomProductId] = $this->prepareProduct(
                     $item->getProductId(),
                     $item->getQtyOrdered(),
                     $item->getPriceInclTax()
